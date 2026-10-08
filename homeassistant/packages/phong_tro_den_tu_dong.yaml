@@ -27,14 +27,25 @@ automation:
       - trigger: state
         entity_id: binary_sensor.led_giuong_co_nguoi
         to: "on"
+      # Đang ngồi trong phòng thì trời tối dần -> cũng phải bật đèn
+      - trigger: numeric_state
+        entity_id: sensor.led_giuong_do_sang_phong
+        below: input_number.nguong_lux_bat_den
+        for: "00:01:00"
     conditions:
       - condition: state
         entity_id: input_boolean.den_tu_dong
         state: "on"
+      - condition: state
+        entity_id: binary_sensor.led_giuong_co_nguoi
+        state: "on"
+      # Không có số đo lux (chưa lắp BH1750 / cảm biến lỗi) -> coi như tối,
+      # để thà bật đèn ban ngày còn hơn để người trong phòng ngồi tối.
       - condition: template
         value_template: >
-          {{ states('sensor.led_giuong_do_sang_phong') | float(0)
-             < states('input_number.nguong_lux_bat_den') | float(30) }}
+          {% set lux = states('sensor.led_giuong_do_sang_phong') %}
+          {{ not is_number(lux)
+             or lux | float < states('input_number.nguong_lux_bat_den') | float(30) }}
       - condition: state
         entity_id: light.led_giuong_den_led
         state: "off"
