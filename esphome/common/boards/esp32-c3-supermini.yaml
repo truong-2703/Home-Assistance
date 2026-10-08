@@ -1,0 +1,8 @@
+# ESP32-C3 SuperMini — rẻ, nhỏ, dễ mua ở VN.
+# Chân nên tránh: GPIO2, GPIO8, GPIO9 (strapping; GPIO8 là LED onboard).
+# Đổi board = đổi đúng file include này, phần còn lại giữ nguyên.
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf

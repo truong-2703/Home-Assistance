@@ -1,0 +1,29 @@
+# Cảm biến hiện diện mmWave HLK-LD2410C.
+# Khác PIR: phát hiện cả người ngồi yên / nằm ngủ -> đèn không tự tắt khi đang làm việc.
+# Substitutions cần có: ld2410_tx_pin, ld2410_rx_pin
+
+uart:
+  id: ld2410_uart
+  tx_pin: ${ld2410_tx_pin}
+  rx_pin: ${ld2410_rx_pin}
+  baud_rate: 256000
+  parity: NONE
+  stop_bits: 1
+
+ld2410:
+  uart_id: ld2410_uart
+
+binary_sensor:
+  - platform: ld2410
+    has_target:
+      id: presence
+      name: "Có người"
+    has_moving_target:
+      name: "Chuyển động"
+    has_still_target:
+      name: "Người đứng yên"
+
+sensor:
+  - platform: ld2410
+    detection_distance:
+      name: "Khoảng cách phát hiện"
