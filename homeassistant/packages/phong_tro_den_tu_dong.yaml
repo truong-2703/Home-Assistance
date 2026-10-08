@@ -1,0 +1,81 @@
+# Package Home Assistant: đèn LED tự động theo người + độ sáng + giờ trong ngày.
+# Bật packages trong configuration.yaml:
+#   homeassistant:
+#     packages: !include_dir_named packages
+# Entity id dưới đây sinh ra từ friendly_name "LED Giuong" của node ESPHome —
+# kiểm tra lại trong Settings > Devices nếu bạn đổi tên.
+
+input_boolean:
+  den_tu_dong:
+    name: Đèn tự động
+    icon: mdi:motion-sensor
+
+input_number:
+  nguong_lux_bat_den:
+    name: Ngưỡng lux bật đèn
+    min: 0
+    max: 200
+    step: 5
+    initial: 30
+    unit_of_measurement: lx
+
+automation:
+  - id: phong_tro_bat_den_khi_co_nguoi
+    alias: "Phòng trọ: bật đèn khi có người và trời tối"
+    mode: restart
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.led_giuong_co_nguoi
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: input_boolean.den_tu_dong
+        state: "on"
+      - condition: template
+        value_template: >
+          {{ states('sensor.led_giuong_do_sang_phong') | float(0)
+             < states('input_number.nguong_lux_bat_den') | float(30) }}
+      - condition: state
+        entity_id: light.led_giuong_den_led
+        state: "off"
+    actions:
+      - choose:
+          # Ban đêm: ánh sáng ấm, rất dịu để không chói mắt
+          - conditions:
+              - condition: time
+                after: "22:30:00"
+                before: "06:00:00"
+            sequence:
+              - action: light.turn_on
+                target:
+                  entity_id: light.led_giuong_den_led
+                data:
+                  brightness_pct: 10
+                  rgb_color: [255, 120, 30]
+                  transition: 2
+        default:
+          - action: light.turn_on
+            target:
+              entity_id: light.led_giuong_den_led
+            data:
+              brightness_pct: 80
+              rgb_color: [255, 200, 140]
+              transition: 1
+
+  - id: phong_tro_tat_den_khi_vang_nguoi
+    alias: "Phòng trọ: tắt đèn khi không còn người"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.led_giuong_co_nguoi
+        to: "off"
+        for: "00:03:00"
+    conditions:
+      - condition: state
+        entity_id: input_boolean.den_tu_dong
+        state: "on"
+    actions:
+      - action: light.turn_off
+        target:
+          entity_id: light.led_giuong_den_led
+        data:
+          transition: 3
