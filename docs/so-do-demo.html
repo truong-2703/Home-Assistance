@@ -1,0 +1,291 @@
+<title>Sơ đồ LED bàn làm việc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: một cột tài liệu kỹ thuật; sơ đồ toàn chiều rộng, cuộn ngang riêng trên điện thoại */
+:root {
+  --bg: #f3f6f5;
+  --panel: #ffffff;
+  --fg: #1b2321;
+  --muted: #5b6764;
+  --line: #d5dddb;
+  --p5v: #c2362b;
+  --p3v: #a86a12;
+  --sig: #0d7480;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111715; --panel: #18201e; --fg: #e2e8e6; --muted: #9aa7a3; --line: #2c3633;
+    --p5v: #ff6f61; --p3v: #e6ac4c; --sig: #4fc6cf; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111715; --panel: #18201e; --fg: #e2e8e6; --muted: #9aa7a3; --line: #2c3633;
+  --p5v: #ff6f61; --p3v: #e6ac4c; --sig: #4fc6cf; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-size: clamp(24px, 4vw, 32px); font-weight: 600; text-wrap: balance; }
+h2 { margin: 0 0 10px; font-size: 18px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+.lead { color: var(--muted); }
+
+figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.scroll { overflow-x: auto; }
+svg.sch { display: block; width: 100%; min-width: 860px; height: auto; color: var(--fg); font-family: var(--font-mono); font-size: 12px; }
+figcaption { border-top: 1px solid var(--line); padding: 12px 16px; display: grid; gap: 10px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { display: inline-block; width: 26px; height: 0; border-top: 3px solid; }
+
+/* Lớp nét vẽ trong SVG */
+.box { fill: var(--panel); stroke: currentColor; stroke-width: 1.5; }
+.box.opt { stroke-dasharray: 6 4; }
+.w5 { stroke: var(--p5v); stroke-width: 3.5; fill: none; }
+.wg { stroke: currentColor; stroke-width: 3.5; fill: none; }
+.w5s { stroke: var(--p5v); stroke-width: 2; fill: none; }
+.wgs { stroke: currentColor; stroke-width: 2; fill: none; }
+.w3 { stroke: var(--p3v); stroke-width: 2; fill: none; }
+.ws { stroke: var(--sig); stroke-width: 2; fill: none; }
+.ws.opt { stroke-dasharray: 6 4; }
+.dot5 { fill: var(--p5v); }
+.dotg { fill: currentColor; }
+.f5 { stroke: var(--p5v); stroke-width: 2; fill: var(--p5v); }
+.f3 { stroke: var(--p3v); stroke-width: 2; fill: var(--p3v); }
+.gnd { stroke: currentColor; stroke-width: 2; fill: none; }
+.t { fill: currentColor; }
+.tm { fill: var(--muted); }
+.ts { fill: var(--sig); }
+.t5 { fill: var(--p5v); }
+.t3 { fill: var(--p3v); }
+.title { font-family: var(--font-body); font-weight: 600; font-size: 13px; }
+.arrowhead { fill: var(--sig); }
+.res { fill: var(--panel); stroke: var(--sig); stroke-width: 2; }
+
+.grid2 { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 28px; align-items: start; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.tbl { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+td code, li code { font-family: var(--font-mono); font-size: 13px; }
+td.n { white-space: nowrap; font-family: var(--font-mono); font-size: 13px; }
+tr.sec td { background: var(--bg); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-block: 6px; }
+ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+ol li { max-width: 60ch; }
+.k { color: var(--p5v); font-weight: 600; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Demo · ESP32-C3 SuperMini · ESPHome</div>
+    <h1>Sơ đồ đấu dây: LED bàn làm việc + cảm biến hiện diện</h1>
+    <p class="lead">Adapter 5V cấp thẳng cho dải LED và ESP32 qua hai thanh nguồn. ESP32 đọc radar LD2410C qua UART và đẩy dữ liệu màu qua IC chuyển mức 74AHCT125 tới dải WS2812B.</p>
+  </header>
+
+  <figure>
+    <div class="scroll">
+      <svg class="sch" viewBox="0 0 1280 640" role="img" aria-label="Sơ đồ: adapter 5V cấp nguồn cho thanh +5V và GND; dải LED WS2812B, ESP32-C3, 74AHCT125 và LD2410C lấy nguồn từ đó; GPIO10 qua 74AHCT125 và trở 330 ohm tới DIN dải LED; GPIO21/GPIO20 nối chéo RX/TX của LD2410C; BH1750 tuỳ chọn nối I2C GPIO6/GPIO7 và nguồn 3V3.">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="arrowhead" d="M0,0 L10,5 L0,10 z"/>
+          </marker>
+          <g id="g-gnd">
+            <line x1="0" y1="0" x2="0" y2="10"/>
+            <line x1="-9" y1="10" x2="9" y2="10"/>
+            <line x1="-6" y1="14" x2="6" y2="14"/>
+            <line x1="-3" y1="18" x2="3" y2="18"/>
+          </g>
+        </defs>
+
+        <!-- Thanh nguồn chính (dây to) -->
+        <path class="w5" d="M90,270 V60 H1200 V312"/>
+        <path class="wg" d="M90,370 V590 H1200 V322"/>
+        <text class="t5" x="170" y="50">+5V  ·  dây ≥ 0,5 mm² (AWG20)</text>
+        <text class="tm" x="170" y="612">GND chung cho mọi linh kiện</text>
+
+        <!-- Adapter -->
+        <rect class="box" x="20" y="270" width="140" height="100" rx="4"/>
+        <text class="t title" x="90" y="305" text-anchor="middle">Adapter</text>
+        <text class="t" x="90" y="324" text-anchor="middle">5V ⎓ 5A</text>
+        <text class="tm" x="90" y="342" text-anchor="middle">jack DC 5.5</text>
+        <text class="t5" x="100" y="286">+</text>
+        <text class="tm" x="100" y="364">−</text>
+
+        <!-- Tụ C1 sát đầu dải LED -->
+        <line class="w5s" x1="1186" y1="312" x2="1214" y2="312"/>
+        <line class="wgs" x1="1186" y1="322" x2="1214" y2="322"/>
+        <text class="t5" x="1176" y="306" text-anchor="end">+</text>
+        <text class="t" x="1222" y="314">C1</text>
+        <text class="tm" x="1222" y="330">1000 µF</text>
+
+        <!-- Dải LED -->
+        <line class="w5" x1="1095" y1="60" x2="1095" y2="180"/>
+        <line class="wg" x1="1095" y1="470" x2="1095" y2="590"/>
+        <circle class="dot5" cx="1095" cy="60" r="5"/>
+        <circle class="dotg" cx="1095" cy="590" r="5"/>
+        <rect class="box" x="1040" y="180" width="110" height="290" rx="4"/>
+        <text class="t5" x="1095" y="198" text-anchor="middle">+5V</text>
+        <text class="ts" x="1048" y="234">DIN</text>
+        <text class="t" x="1095" y="462" text-anchor="middle">GND</text>
+        <text class="t title" x="1095" y="300" text-anchor="middle">WS2812B</text>
+        <text class="tm" x="1095" y="318" text-anchor="middle" font-size="11">5V · 60 LED/m</text>
+        <text class="tm" x="1095" y="335" text-anchor="middle" font-size="11">~1,5 m ≈ 90 LED</text>
+        <g class="gnd">
+          <rect x="1083" y="365" width="24" height="16" rx="2"/>
+          <rect x="1083" y="389" width="24" height="16" rx="2"/>
+          <rect x="1083" y="413" width="24" height="16" rx="2"/>
+        </g>
+
+        <!-- ESP32-C3 SuperMini -->
+        <line class="w5" x1="280" y1="60" x2="280" y2="180"/>
+        <line class="wg" x1="280" y1="520" x2="280" y2="590"/>
+        <circle class="dot5" cx="280" cy="60" r="5"/>
+        <circle class="dotg" cx="280" cy="590" r="5"/>
+        <rect class="box" x="230" y="180" width="190" height="340" rx="4"/>
+        <text class="t5" x="280" y="198" text-anchor="middle">5V</text>
+        <text class="t" x="280" y="510" text-anchor="middle">GND</text>
+        <text class="t3" x="370" y="510" text-anchor="middle">3V3</text>
+        <text class="tm" x="280" y="315" text-anchor="middle">U1</text>
+        <text class="t title" x="280" y="333" text-anchor="middle">ESP32-C3</text>
+        <text class="tm" x="280" y="350" text-anchor="middle">SuperMini</text>
+        <text class="t" x="410" y="234" text-anchor="end">GPIO10</text>
+        <text class="t" x="410" y="324" text-anchor="end">GPIO21 TX</text>
+        <text class="t" x="410" y="374" text-anchor="end">GPIO20 RX</text>
+        <text class="t" x="410" y="449" text-anchor="end">GPIO6 SDA</text>
+        <text class="t" x="410" y="479" text-anchor="end">GPIO7 SCL</text>
+        <rect class="box" x="222" y="405" width="10" height="26" rx="2"/>
+        <text class="tm" x="214" y="422" text-anchor="end">USB-C · nạp code</text>
+        <line class="w3" x1="370" y1="520" x2="370" y2="550"/>
+        <line class="w3" x1="360" y1="550" x2="380" y2="550"/>
+        <text class="t3" x="370" y="567" text-anchor="middle">+3V3</text>
+
+        <!-- U2 74AHCT125 -->
+        <rect class="box" x="600" y="150" width="160" height="120" rx="4"/>
+        <text class="tm" x="680" y="198" text-anchor="middle">U2</text>
+        <text class="t title" x="680" y="214" text-anchor="middle">74AHCT125</text>
+        <text class="t" x="680" y="166" text-anchor="middle" font-size="11">VCC (14)</text>
+        <text class="t" x="680" y="262" text-anchor="middle" font-size="11">GND (7)</text>
+        <text class="t" x="608" y="179" font-size="11">1OE (1)</text>
+        <text class="t" x="608" y="234" font-size="11">1A (2)</text>
+        <text class="t" x="752" y="234" text-anchor="end" font-size="11">(3) 1Y</text>
+        <line class="w5s" x1="680" y1="150" x2="680" y2="132"/>
+        <line class="w5s" x1="670" y1="132" x2="690" y2="132"/>
+        <text class="t5" x="680" y="125" text-anchor="middle">+5V</text>
+        <use href="#g-gnd" class="gnd" x="680" y="270"/>
+        <line class="wgs" x1="600" y1="175" x2="572" y2="175"/>
+        <use href="#g-gnd" class="gnd" x="572" y="175"/>
+
+        <!-- Dữ liệu LED: GPIO10 → U2 → R1 → DIN -->
+        <line class="ws" x1="420" y1="230" x2="600" y2="230" marker-end="url(#arr)"/>
+        <text class="ts" x="510" y="222" text-anchor="middle">dữ liệu 3,3V</text>
+        <line class="ws" x1="760" y1="230" x2="810" y2="230"/>
+        <rect class="res" x="810" y="222" width="60" height="16" rx="2"/>
+        <text class="t" x="840" y="212" text-anchor="middle">R1 330 Ω</text>
+        <line class="ws" x1="870" y1="230" x2="1040" y2="230" marker-end="url(#arr)"/>
+        <text class="ts" x="955" y="222" text-anchor="middle">dữ liệu 5V</text>
+
+        <!-- U3 LD2410C -->
+        <rect class="box" x="600" y="295" width="160" height="100" rx="4"/>
+        <text class="t" x="608" y="324" font-size="11">RX</text>
+        <text class="t" x="608" y="374" font-size="11">TX</text>
+        <text class="t" x="752" y="324" text-anchor="end" font-size="11">VCC</text>
+        <text class="t" x="752" y="374" text-anchor="end" font-size="11">GND</text>
+        <text class="tm" x="680" y="334" text-anchor="middle">U3</text>
+        <text class="t title" x="680" y="350" text-anchor="middle">HLK-LD2410C</text>
+        <text class="tm" x="680" y="366" text-anchor="middle" font-size="11">OUT để trống</text>
+        <line class="ws" x1="420" y1="320" x2="600" y2="320" marker-end="url(#arr)"/>
+        <line class="ws" x1="600" y1="370" x2="420" y2="370" marker-end="url(#arr)"/>
+        <text class="ts" x="510" y="312" text-anchor="middle">UART 256000</text>
+        <line class="w5s" x1="760" y1="320" x2="790" y2="320"/>
+        <line class="w5s" x1="790" y1="320" x2="790" y2="306"/>
+        <line class="w5s" x1="780" y1="306" x2="800" y2="306"/>
+        <text class="t5" x="790" y="299" text-anchor="middle">+5V</text>
+        <line class="wgs" x1="760" y1="370" x2="790" y2="370"/>
+        <use href="#g-gnd" class="gnd" x="790" y="370"/>
+
+        <!-- U4 BH1750 (tuỳ chọn) -->
+        <rect class="box opt" x="600" y="425" width="160" height="95" rx="4"/>
+        <text class="t" x="608" y="449" font-size="11">SDA</text>
+        <text class="t" x="608" y="479" font-size="11">SCL</text>
+        <text class="t" x="752" y="449" text-anchor="end" font-size="11">VCC</text>
+        <text class="t" x="752" y="479" text-anchor="end" font-size="11">GND</text>
+        <text class="t" x="752" y="505" text-anchor="end" font-size="11">ADDR</text>
+        <text class="t title" x="680" y="466" text-anchor="middle">U4 BH1750</text>
+        <text class="tm" x="680" y="482" text-anchor="middle" font-size="11">tuỳ chọn</text>
+        <line class="ws opt" x1="420" y1="445" x2="600" y2="445"/>
+        <line class="ws opt" x1="420" y1="475" x2="600" y2="475"/>
+        <text class="ts" x="510" y="437" text-anchor="middle">I2C</text>
+        <line class="w3" x1="760" y1="445" x2="790" y2="445"/>
+        <line class="w3" x1="790" y1="445" x2="790" y2="431"/>
+        <line class="w3" x1="780" y1="431" x2="800" y2="431"/>
+        <text class="t3" x="790" y="424" text-anchor="middle">+3V3</text>
+        <line class="wgs" x1="760" y1="475" x2="790" y2="475"/>
+        <line class="wgs" x1="760" y1="501" x2="790" y2="501"/>
+        <line class="wgs" x1="790" y1="475" x2="790" y2="501"/>
+        <circle class="dotg" cx="790" cy="475" r="3.5"/>
+        <use href="#g-gnd" class="gnd" x="790" y="501"/>
+      </svg>
+    </div>
+    <figcaption>
+      <div class="legend">
+        <span><i style="border-color: var(--p5v)"></i>+5V (nét to: dòng chính của LED)</span>
+        <span><i style="border-color: var(--fg)"></i>GND</span>
+        <span><i style="border-color: var(--p3v)"></i>+3V3 từ ESP32</span>
+        <span><i style="border-color: var(--sig)"></i>Tín hiệu (mũi tên = chiều dữ liệu)</span>
+        <span><i style="border-color: var(--sig); border-top-style: dashed"></i>Tuỳ chọn</span>
+      </div>
+      <p class="lead">Các ký hiệu “+5V”, “+3V3” và ký hiệu đất cùng tên là cùng một dây, chỉ vẽ tách ra cho gọn. Mọi GND phải nối chung với nhau.</p>
+    </figcaption>
+  </figure>
+
+  <div class="grid2">
+    <section>
+      <h2>Bảng nối dây</h2>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Từ</th><th>Tới</th><th>Ghi chú</th></tr></thead>
+          <tbody>
+            <tr class="sec"><td colspan="3">Nguồn</td></tr>
+            <tr><td>Adapter +5V / GND</td><td>Dải LED +5V / GND</td><td>Cấp thẳng từ adapter, không đi qua board ESP32</td></tr>
+            <tr><td>C1 1000 µF 10V</td><td>Giữa +5V và GND, sát đầu dải LED</td><td>Chân dài (+) vào 5V</td></tr>
+            <tr><td>ESP32 5V / GND</td><td>Thanh +5V / GND</td><td></td></tr>
+            <tr class="sec"><td colspan="3">Dữ liệu LED</td></tr>
+            <tr><td class="n">GPIO10</td><td>U2 chân 2 (1A)</td><td></td></tr>
+            <tr><td>U2 chân 3 (1Y)</td><td>R1 330 Ω → DIN dải LED</td><td>R1 đặt sát đầu dải</td></tr>
+            <tr><td>U2 chân 1 (1OE)</td><td>GND</td><td>Bật kênh 1</td></tr>
+            <tr><td>U2 chân 14 / 7</td><td>+5V / GND</td><td>Thêm tụ 100 nF sát hai chân này</td></tr>
+            <tr><td>U2 chân 4, 10, 13</td><td>+5V</td><td>Tắt 3 kênh không dùng</td></tr>
+            <tr><td>U2 chân 5, 9, 12</td><td>GND</td><td>Không để chân vào lơ lửng</td></tr>
+            <tr class="sec"><td colspan="3">Radar LD2410C</td></tr>
+            <tr><td class="n">GPIO21 (TX)</td><td>LD2410C RX</td><td>Nối chéo TX → RX</td></tr>
+            <tr><td class="n">GPIO20 (RX)</td><td>LD2410C TX</td><td></td></tr>
+            <tr><td>LD2410C VCC / GND</td><td>+5V / GND</td><td>Chân OUT để trống</td></tr>
+            <tr class="sec"><td colspan="3">BH1750 (tuỳ chọn)</td></tr>
+            <tr><td class="n">GPIO6 / GPIO7</td><td>BH1750 SDA / SCL</td><td></td></tr>
+            <tr><td>ESP32 3V3</td><td>BH1750 VCC</td><td></td></tr>
+            <tr><td>BH1750 GND, ADDR</td><td>GND</td><td>ADDR xuống GND: địa chỉ 0x23</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Trước khi cắm điện</h2>
+      <ol>
+        <li><span class="k">Nạp firmware lần đầu:</span> rút adapter, chỉ cắm USB-C. Không cấp nguồn từ cả hai cùng lúc.</li>
+        <li>Đo cực tính jack DC bằng đồng hồ trước khi nối vào ESP32. Ngược cực là cháy board.</li>
+        <li>Dải WS2812B có mũi tên in trên dải. Hàn vào đầu có <code>DIN</code>, mũi tên chỉ ra xa điểm hàn.</li>
+        <li>Firmware giới hạn độ sáng 60%: 90 LED ăn khoảng 3,3 A, adapter 5A còn dư. Dải dài hơn 2 m thì nối thêm +5V/GND vào cuối dải.</li>
+        <li>Muốn thử không có U2: nối <code>GPIO10 → R1 → DIN</code> trực tiếp, dây ngắn dưới 20 cm. Nếu LED nháy sai màu thì lắp U2 vào.</li>
+        <li>Đặt hộp mạch ở mép bàn, mặt radar hướng ra cửa phòng, không có kim loại che phía trước.</li>
+        <li>Trong <code>esphome/phongtro-led-giuong.yaml</code>, sửa <code>num_leds</code> đúng số LED thực tế. Các chân GPIO đã khớp với sơ đồ này.</li>
+      </ol>
+    </section>
+  </div>
+</div>
