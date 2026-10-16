@@ -9,3 +9,21 @@ esphome/.esphome/
 homeassistant/.storage/
 homeassistant/*.db
 homeassistant/*.log
+
+# Demo TruongHA (thư mục config/) - dữ liệu Home Assistant tự sinh khi chạy
+config/.storage/
+config/.cloud/
+config/deps/
+config/tts/
+config/backups/
+config/blueprints/
+config/*.db
+config/*.db-shm
+config/*.db-wal
+config/*.log*
+config/.HA_VERSION
+config/.ha_run.lock
+config/automations.yaml
+config/scripts.yaml
+config/scenes.yaml
+__pycache__/

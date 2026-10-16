@@ -1,0 +1,344 @@
+# Bảng điều khiển cho người thuyết trình (khách không cần thấy trang này)
+title: Điều khiển demo
+views:
+  - title: Kịch bản
+    path: kich-ban
+    icon: mdi:presentation-play
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 3
+        cards:
+          - type: markdown
+            grid_options:
+              columns: full
+            text_only: true
+            content: >
+              # 🎬 Điều khiển demo TruongHA
+
+              🕒 Giờ kịch bản **{{ states('input_datetime.gio_kich_ban')[:5] }}** ·
+              🏠 **{{ states('input_select.che_do_nha') }}** ·
+              {% set an_ninh = {'disarmed': 'Tắt', 'armed_away': 'Đi vắng', 'armed_night': 'Ban đêm',
+                 'triggered': '🚨 ĐANG BÁO ĐỘNG', 'armed_home': 'Ở nhà'} %}
+              🛡️ An ninh **{{ an_ninh.get(states('alarm_control_panel.an_ninh_can_ho'), '…') }}** ·
+              📍 Anh Minh cách nhà **{{ states('input_number.khoang_cach_ve_nha') }} km**
+          - type: conditional
+            grid_options:
+              columns: full
+            conditions:
+              - condition: state
+                entity: input_boolean.co_thong_bao
+                state: "on"
+            card:
+              type: markdown
+              text_only: true
+              content: >
+                {% set m = states('input_text.thong_bao_muc_do') %}
+                {% set loai = {'critical': 'error', 'warning': 'warning', 'success': 'success'}.get(m, 'info') %}
+                <ha-alert alert-type="{{ loai }}" title="{{ states('input_text.thong_bao_tieu_de') }}">{{ states('input_text.thong_bao_noi_dung') }}</ha-alert>
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Chuẩn bị"
+            icon: mdi:restore
+          - type: markdown
+            text_only: true
+            content: |
+              - Mở dashboard **TruongHA** trên màn hình lớn (máy chiếu/TV).
+              - Mở trang này trên điện thoại hoặc laptop của bạn, khách không cần thấy.
+              - Bấm **Khôi phục** trước mỗi buổi demo: đưa căn hộ về 5:55 sáng, cả nhà đang ngủ.
+          - type: tile
+            entity: script.demo_khoi_phuc
+            hide_state: true
+            name: "Khôi phục từ đầu"
+            color: red
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_khoi_phuc
+          - type: tile
+            entity: script.an_thong_bao
+            hide_state: true
+            name: "Ẩn thông báo"
+            color: grey
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.an_thong_bao
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Mở đầu · Tổng quan (2 phút)"
+            icon: mdi:floor-plan
+          - type: markdown
+            text_only: true
+            content: |
+              - "Đây là toàn bộ ngôi nhà trên một màn hình, điện thoại cũng giống hệt."
+              - Chỉ vào sơ đồ: phòng nào sáng đèn, nhiệt độ từng phòng, cửa đang khóa.
+              - Bấm thử vào một phòng trên sơ đồ để bật/tắt đèn.
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 1 · Buổi sáng (2 phút)"
+            icon: mdi:weather-sunset-up
+          - type: markdown
+            text_only: true
+            content: |
+              - Bấm nút, đồng hồ chạy 6:00 → 6:30.
+              - 6:00 bình nóng lạnh tự bật. 6:30 đèn phòng ngủ bật, rèm mở, điều hòa phòng ngủ tắt, thông báo chào buổi sáng.
+              - Sau đó chị Hà xuống bếp: đèn bếp và ấm siêu tốc bật (để dành cho cảnh 2).
+              - **Điểm nhấn:** không cần chạm vào thứ gì.
+          - type: tile
+            entity: script.demo_canh_1_buoi_sang
+            hide_state: true
+            name: "6:00 → 6:30 Buổi sáng"
+            color: orange
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_1_buoi_sang
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 2 · Cả nhà đi vắng (2 phút)"
+            icon: mdi:home-export-outline
+          - type: markdown
+            text_only: true
+            content: |
+              - Cả nhà rời đi lúc 7:30. Mọi thứ tự tắt, cửa khóa, an ninh bật.
+              - **Tình huống đắt giá:** ấm siêu tốc vẫn bật → hệ thống hỏi chủ nhà. Bấm "Tắt ngay" trên dashboard (hoặc trên thông báo điện thoại).
+              - Giải thích: ổ cắm bếp không tự tắt vì có thể đang nấu cơm hẹn giờ, nên hệ thống hỏi trước.
+          - type: tile
+            entity: script.demo_canh_2_di_vang
+            hide_state: true
+            name: "7:30 Cả nhà ra khỏi nhà"
+            color: blue
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_2_di_vang
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 3 · An ninh khi vắng nhà (3 phút)"
+            icon: mdi:shield-home
+          - type: markdown
+            text_only: true
+            content: |
+              - 9:05 chị Lan (giúp việc) mở cửa bằng **mã tạm** → chủ nhà nhận thông báo, an ninh tạm tắt.
+              - 11:00 chị Lan về → cửa tự khóa, an ninh bật lại.
+              - 12:30 có người thử mã ngoài giờ → bị từ chối, chủ nhà được báo.
+              - 14:00 cửa chính bị mở khi không có ai → còi, nháy đèn, ảnh camera, thông báo khẩn.
+              - Sau đó vào tab **An ninh** để tắt báo động (mời khách tự bấm).
+          - type: tile
+            entity: script.demo_canh_3_giup_viec_vao
+            hide_state: true
+            name: "9:05 Chị Lan vào bằng mã tạm"
+            color: teal
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_3_giup_viec_vao
+          - type: tile
+            entity: script.demo_canh_3_giup_viec_ve
+            hide_state: true
+            name: "11:00 Chị Lan ra về"
+            color: teal
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_3_giup_viec_ve
+          - type: tile
+            entity: script.demo_canh_3_ma_tam_ngoai_gio
+            hide_state: true
+            name: "12:30 Thử mã ngoài giờ"
+            color: amber
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_3_ma_tam_ngoai_gio
+          - type: tile
+            entity: script.demo_canh_3_dot_nhap
+            hide_state: true
+            name: "14:00 Cửa chính bị mở"
+            color: red
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_3_dot_nhap
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 4 · Cảnh báo khói và gas (2 phút)"
+            icon: mdi:fire-alert
+          - type: markdown
+            text_only: true
+            content: |
+              - **Khói:** còi kêu, bật toàn bộ đèn, mở khóa cửa để thoát hiểm, tắt điều hòa để khói không lan.
+              - **Gas:** còi kêu, mở khóa cửa nhưng **cố ý không bật/tắt đèn** để tránh tia lửa điện, kèm hướng dẫn xử lý.
+              - Nhấn mạnh: đây là lý do gia đình có trẻ nhỏ hoặc người già nên dùng hệ thống.
+              - Bấm **Hết sự cố** để tắt còi trước khi sang cảnh 5.
+          - type: tile
+            entity: script.demo_canh_4_khoi
+            hide_state: true
+            name: "Có khói trong bếp"
+            color: red
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_4_khoi
+          - type: tile
+            entity: script.demo_canh_4_gas
+            hide_state: true
+            name: "Rò rỉ gas"
+            color: deep-orange
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_4_gas
+          - type: tile
+            entity: script.demo_canh_4_het_su_co
+            hide_state: true
+            name: "Hết sự cố"
+            color: green
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_4_het_su_co
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 5 · Về nhà (2 phút)"
+            icon: mdi:home-import-outline
+          - type: markdown
+            text_only: true
+            content: |
+              - 18:00 anh Minh còn cách nhà 2 km → điều hòa phòng khách tự bật trước (phòng đang 32°C, xem nhiệt độ giảm dần).
+              - 18:15 mở khóa cửa → an ninh tự tắt, trời tối nên đèn hành lang và phòng khách tự bật.
+              - Cửa vẫn để mở khóa (để dành cho cảnh Đi ngủ).
+          - type: tile
+            entity: script.demo_canh_5_sap_ve
+            hide_state: true
+            name: "18:00 Còn 2 km"
+            color: blue
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_5_sap_ve
+          - type: tile
+            entity: script.demo_canh_5_mo_cua
+            hide_state: true
+            name: "18:15 Mở cửa về nhà"
+            color: green
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_5_mo_cua
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 6 · Buổi tối (2 phút)"
+            icon: mdi:weather-night
+          - type: markdown
+            text_only: true
+            content: |
+              - 20:00 **Xem phim:** tắt đèn chính, bật đèn trang trí, đóng rèm, bật TV.
+              - 22:30 **Đi ngủ:** tắt hết đèn, điều hòa phòng ngủ 26°C chế độ ngủ, phát hiện **cửa chưa khóa** → bấm khóa từ xa.
+              - 2:00 có người dậy đi vệ sinh → đèn hành lang và nhà tắm tự bật, tự tắt sau 20 giây không có chuyển động (nhà thật để 2 phút).
+          - type: tile
+            entity: script.demo_canh_6_xem_phim
+            hide_state: true
+            name: "20:00 Xem phim"
+            color: purple
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_6_xem_phim
+          - type: tile
+            entity: script.demo_canh_6_di_ngu
+            hide_state: true
+            name: "22:30 Đi ngủ"
+            color: indigo
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_6_di_ngu
+          - type: tile
+            entity: script.demo_canh_6_dem
+            hide_state: true
+            name: "2:00 Dậy đi vệ sinh"
+            color: blue-grey
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_canh_6_dem
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Cảnh 7 · Tiết kiệm điện (2 phút)"
+            icon: mdi:lightning-bolt
+          - type: markdown
+            text_only: true
+            content: |
+              - Mở tab **Năng lượng**: công suất cả nhà thay đổi theo thiết bị đang bật.
+              - Bảng so sánh tiền điện theo biểu giá bậc thang EVN: đây là con số khách quan tâm nhất.
+              - Nói rõ đây là **số liệu minh họa**.
+          - type: button
+            name: Mở tab Năng lượng
+            icon: mdi:open-in-app
+            show_state: false
+            grid_options:
+              columns: full
+              rows: 1
+            tap_action:
+              action: navigate
+              navigation_path: /truongha-nha/nang-luong
+      - type: grid
+        cards:
+          - type: heading
+            heading: "Kết · Khách tự trải nghiệm (5 phút)"
+            icon: mdi:account-group
+          - type: markdown
+            text_only: true
+            content: |
+              - Đưa điện thoại/tablet cho khách tự bấm trên sơ đồ nhà và các chế độ.
+              - Giới thiệu 2 gói: **Cơ bản** (đèn, điều hòa, khóa, cảm biến cửa) và **Nâng cao** (đầy đủ như demo).
+      - type: grid
+        cards:
+          - type: heading
+            heading: Điều khiển tay (khi cần)
+            icon: mdi:tune
+          - type: entities
+            entities:
+              - entity: input_datetime.gio_kich_ban
+              - entity: input_select.che_do_nha
+              - entity: input_number.khoang_cach_ve_nha
+              - entity: input_number.gia_lap_nhiet_do_ngoai_troi
+                name: Nhiệt độ ngoài trời
+              - entity: input_boolean.gia_lap_cua_chinh
+                name: Cửa chính đang mở
+              - entity: input_boolean.gia_lap_chuyen_dong_hanh_lang
+                name: Có chuyển động hành lang
+              - entity: input_boolean.gia_lap_khoi_bep
+                name: Có khói
+              - entity: input_boolean.gia_lap_gas_bep
+                name: Có gas
+              - entity: input_text.dich_vu_thong_bao_dien_thoai
+                name: Gửi thông báo tới điện thoại

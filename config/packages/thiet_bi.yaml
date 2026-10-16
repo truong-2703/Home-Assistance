@@ -1,0 +1,457 @@
+# Thiết bị giả lập của căn hộ.
+# Mỗi thiết bị "thật" (đèn, ổ cắm, khóa, rèm, cảm biến...) được lưu trạng thái trong một
+# helper ẩn tên gia_lap_* . Khi có phần cứng thật, chỉ cần thay thiết bị ảo bằng thiết bị thật
+# có cùng entity_id là các automation và dashboard vẫn chạy nguyên vẹn.
+
+input_boolean:
+  gia_lap_den_phong_khach:
+    name: "[Giả lập] Đèn chính phòng khách"
+  gia_lap_den_trang_tri:
+    name: "[Giả lập] Đèn trang trí phòng khách"
+  gia_lap_den_master:
+    name: "[Giả lập] Đèn phòng ngủ master"
+  gia_lap_den_ngu_master:
+    name: "[Giả lập] Đèn ngủ phòng master"
+  gia_lap_den_phong_be:
+    name: "[Giả lập] Đèn phòng bé"
+  gia_lap_den_bep:
+    name: "[Giả lập] Đèn bếp"
+  gia_lap_den_nha_tam:
+    name: "[Giả lập] Đèn nhà tắm"
+  gia_lap_den_hanh_lang:
+    name: "[Giả lập] Đèn hành lang"
+  gia_lap_o_cam_am_sieu_toc:
+    name: "[Giả lập] Ổ cắm ấm siêu tốc"
+  gia_lap_o_cam_noi_com:
+    name: "[Giả lập] Ổ cắm nồi cơm"
+  gia_lap_binh_nong_lanh:
+    name: "[Giả lập] Bình nóng lạnh"
+  gia_lap_coi_bao_dong:
+    name: "[Giả lập] Còi báo động"
+  gia_lap_may_nen_phong_khach:
+    name: "[Giả lập] Máy nén điều hòa phòng khách"
+  gia_lap_may_nen_master:
+    name: "[Giả lập] Máy nén điều hòa phòng master"
+  gia_lap_may_nen_phong_be:
+    name: "[Giả lập] Máy nén điều hòa phòng bé"
+  gia_lap_khoa_cua_chinh:
+    name: "[Giả lập] Khóa cửa chính (bật = đã khóa)"
+    initial: true
+  gia_lap_rem_phong_khach:
+    name: "[Giả lập] Rèm phòng khách (bật = đang mở)"
+  gia_lap_rem_master:
+    name: "[Giả lập] Rèm phòng ngủ master (bật = đang mở)"
+  gia_lap_cua_chinh:
+    name: "[Giả lập] Cảm biến cửa chính"
+    initial: false
+  gia_lap_chuyen_dong_hanh_lang:
+    name: "[Giả lập] Cảm biến chuyển động hành lang"
+    initial: false
+  gia_lap_khoi_bep:
+    name: "[Giả lập] Cảm biến khói bếp"
+    initial: false
+  gia_lap_gas_bep:
+    name: "[Giả lập] Cảm biến gas bếp"
+    initial: false
+  gia_lap_tv_phong_khach:
+    name: "[Giả lập] TV phòng khách"
+
+input_number:
+  gia_lap_nhiet_do_phong_khach:
+    name: "[Giả lập] Nhiệt độ phòng khách"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 29
+    unit_of_measurement: "°C"
+    mode: box
+  gia_lap_nhiet_do_master:
+    name: "[Giả lập] Nhiệt độ phòng master"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 26.5
+    unit_of_measurement: "°C"
+    mode: box
+  gia_lap_nhiet_do_phong_be:
+    name: "[Giả lập] Nhiệt độ phòng bé"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 26.5
+    unit_of_measurement: "°C"
+    mode: box
+  gia_lap_nhiet_do_ngoai_troi:
+    name: "[Giả lập] Nhiệt độ ngoài trời"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 27
+    unit_of_measurement: "°C"
+    mode: box
+  gia_lap_do_am_phong_khach:
+    name: "[Giả lập] Độ ẩm phòng khách"
+    min: 20
+    max: 100
+    step: 1
+    initial: 68
+    unit_of_measurement: "%"
+    mode: box
+
+template:
+  - light:
+      - name: "Đèn chính phòng khách"
+        unique_id: truongha_light_den_phong_khach
+        default_entity_id: light.den_phong_khach
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.gia_lap_den_phong_khach', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_phong_khach
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_phong_khach
+      - name: "Đèn trang trí phòng khách"
+        unique_id: truongha_light_den_trang_tri
+        default_entity_id: light.den_trang_tri
+        icon: mdi:led-strip-variant
+        state: "{{ is_state('input_boolean.gia_lap_den_trang_tri', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_trang_tri
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_trang_tri
+      - name: "Đèn phòng ngủ master"
+        unique_id: truongha_light_den_master
+        default_entity_id: light.den_master
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.gia_lap_den_master', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_master
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_master
+      - name: "Đèn ngủ phòng master"
+        unique_id: truongha_light_den_ngu_master
+        default_entity_id: light.den_ngu_master
+        icon: mdi:lamp
+        state: "{{ is_state('input_boolean.gia_lap_den_ngu_master', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_ngu_master
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_ngu_master
+      - name: "Đèn phòng bé"
+        unique_id: truongha_light_den_phong_be
+        default_entity_id: light.den_phong_be
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.gia_lap_den_phong_be', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_phong_be
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_phong_be
+      - name: "Đèn bếp"
+        unique_id: truongha_light_den_bep
+        default_entity_id: light.den_bep
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.gia_lap_den_bep', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_bep
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_bep
+      - name: "Đèn nhà tắm"
+        unique_id: truongha_light_den_nha_tam
+        default_entity_id: light.den_nha_tam
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.gia_lap_den_nha_tam', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_nha_tam
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_nha_tam
+      - name: "Đèn hành lang"
+        unique_id: truongha_light_den_hanh_lang
+        default_entity_id: light.den_hanh_lang
+        icon: mdi:wall-sconce-flat
+        state: "{{ is_state('input_boolean.gia_lap_den_hanh_lang', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_den_hanh_lang
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_den_hanh_lang
+  - switch:
+      - name: "Ổ cắm ấm siêu tốc"
+        unique_id: truongha_switch_o_cam_am_sieu_toc
+        default_entity_id: switch.o_cam_am_sieu_toc
+        icon: mdi:kettle
+        state: "{{ is_state('input_boolean.gia_lap_o_cam_am_sieu_toc', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_o_cam_am_sieu_toc
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_o_cam_am_sieu_toc
+      - name: "Ổ cắm nồi cơm"
+        unique_id: truongha_switch_o_cam_noi_com
+        default_entity_id: switch.o_cam_noi_com
+        icon: mdi:pot-steam
+        state: "{{ is_state('input_boolean.gia_lap_o_cam_noi_com', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_o_cam_noi_com
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_o_cam_noi_com
+      - name: "Bình nóng lạnh"
+        unique_id: truongha_switch_binh_nong_lanh
+        default_entity_id: switch.binh_nong_lanh
+        icon: mdi:water-boiler
+        state: "{{ is_state('input_boolean.gia_lap_binh_nong_lanh', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_binh_nong_lanh
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_binh_nong_lanh
+      - name: "Còi báo động"
+        unique_id: truongha_switch_coi_bao_dong
+        default_entity_id: switch.coi_bao_dong
+        icon: mdi:alarm-light
+        state: "{{ is_state('input_boolean.gia_lap_coi_bao_dong', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_coi_bao_dong
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_coi_bao_dong
+      - name: "Máy nén điều hòa phòng khách"
+        unique_id: truongha_switch_may_nen_phong_khach
+        default_entity_id: switch.may_nen_phong_khach
+        icon: mdi:hvac
+        state: "{{ is_state('input_boolean.gia_lap_may_nen_phong_khach', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_may_nen_phong_khach
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_may_nen_phong_khach
+      - name: "Máy nén điều hòa phòng master"
+        unique_id: truongha_switch_may_nen_master
+        default_entity_id: switch.may_nen_master
+        icon: mdi:hvac
+        state: "{{ is_state('input_boolean.gia_lap_may_nen_master', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_may_nen_master
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_may_nen_master
+      - name: "Máy nén điều hòa phòng bé"
+        unique_id: truongha_switch_may_nen_phong_be
+        default_entity_id: switch.may_nen_phong_be
+        icon: mdi:hvac
+        state: "{{ is_state('input_boolean.gia_lap_may_nen_phong_be', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_may_nen_phong_be
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_may_nen_phong_be
+  - lock:
+      - name: "Khóa cửa chính"
+        unique_id: truongha_lock_khoa_cua_chinh
+        default_entity_id: lock.khoa_cua_chinh
+        state: "{{ 'locked' if is_state('input_boolean.gia_lap_khoa_cua_chinh', 'on') else 'unlocked' }}"
+        lock:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_khoa_cua_chinh
+        unlock:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_khoa_cua_chinh
+  - cover:
+      - name: "Rèm phòng khách"
+        unique_id: truongha_cover_rem_phong_khach
+        default_entity_id: cover.rem_phong_khach
+        device_class: curtain
+        state: "{{ 'open' if is_state('input_boolean.gia_lap_rem_phong_khach', 'on') else 'closed' }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_rem_phong_khach
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_rem_phong_khach
+      - name: "Rèm phòng ngủ master"
+        unique_id: truongha_cover_rem_master
+        default_entity_id: cover.rem_master
+        device_class: curtain
+        state: "{{ 'open' if is_state('input_boolean.gia_lap_rem_master', 'on') else 'closed' }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.gia_lap_rem_master
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.gia_lap_rem_master
+  - binary_sensor:
+      - name: "Cảm biến cửa chính"
+        unique_id: truongha_binary_cua_chinh
+        default_entity_id: binary_sensor.cua_chinh
+        device_class: door
+        state: "{{ is_state('input_boolean.gia_lap_cua_chinh', 'on') }}"
+      - name: "Cảm biến chuyển động hành lang"
+        unique_id: truongha_binary_chuyen_dong_hanh_lang
+        default_entity_id: binary_sensor.chuyen_dong_hanh_lang
+        device_class: motion
+        state: "{{ is_state('input_boolean.gia_lap_chuyen_dong_hanh_lang', 'on') }}"
+      - name: "Cảm biến khói bếp"
+        unique_id: truongha_binary_khoi_bep
+        default_entity_id: binary_sensor.khoi_bep
+        device_class: smoke
+        state: "{{ is_state('input_boolean.gia_lap_khoi_bep', 'on') }}"
+      - name: "Cảm biến gas bếp"
+        unique_id: truongha_binary_gas_bep
+        default_entity_id: binary_sensor.gas_bep
+        device_class: gas
+        state: "{{ is_state('input_boolean.gia_lap_gas_bep', 'on') }}"
+  - sensor:
+      - name: "Nhiệt độ phòng khách"
+        unique_id: truongha_sensor_nhiet_do_phong_khach
+        default_entity_id: sensor.nhiet_do_phong_khach
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.gia_lap_nhiet_do_phong_khach') | float(0) | round(1) }}"
+      - name: "Nhiệt độ phòng master"
+        unique_id: truongha_sensor_nhiet_do_master
+        default_entity_id: sensor.nhiet_do_master
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.gia_lap_nhiet_do_master') | float(0) | round(1) }}"
+      - name: "Nhiệt độ phòng bé"
+        unique_id: truongha_sensor_nhiet_do_phong_be
+        default_entity_id: sensor.nhiet_do_phong_be
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.gia_lap_nhiet_do_phong_be') | float(0) | round(1) }}"
+      - name: "Nhiệt độ ngoài trời"
+        unique_id: truongha_sensor_nhiet_do_ngoai_troi
+        default_entity_id: sensor.nhiet_do_ngoai_troi
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.gia_lap_nhiet_do_ngoai_troi') | float(0) | round(1) }}"
+      - name: "Độ ẩm phòng khách"
+        unique_id: truongha_sensor_do_am_phong_khach
+        default_entity_id: sensor.do_am_phong_khach
+        device_class: humidity
+        state_class: measurement
+        unit_of_measurement: "%"
+        state: "{{ states('input_number.gia_lap_do_am_phong_khach') | int(0) }}"
+
+climate:
+  - platform: generic_thermostat
+    name: "Điều hòa phòng khách"
+    unique_id: truongha_climate_phong_khach
+    heater: switch.may_nen_phong_khach
+    target_sensor: sensor.nhiet_do_phong_khach
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp: 25
+    target_temp_step: 1
+    precision: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    sleep_temp: 26
+    initial_hvac_mode: "off"
+  - platform: generic_thermostat
+    name: "Điều hòa phòng master"
+    unique_id: truongha_climate_master
+    heater: switch.may_nen_master
+    target_sensor: sensor.nhiet_do_master
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp: 26
+    target_temp_step: 1
+    precision: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    sleep_temp: 26
+    initial_hvac_mode: "off"
+  - platform: generic_thermostat
+    name: "Điều hòa phòng bé"
+    unique_id: truongha_climate_phong_be
+    heater: switch.may_nen_phong_be
+    target_sensor: sensor.nhiet_do_phong_be
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp: 26
+    target_temp_step: 1
+    precision: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    sleep_temp: 26
+    initial_hvac_mode: "off"
+
+media_player:
+  - platform: universal
+    name: "TV phòng khách"
+    unique_id: truongha_media_tv_phong_khach
+    state_template: "{{ 'on' if is_state('input_boolean.gia_lap_tv_phong_khach', 'on') else 'off' }}"
+    commands:
+      turn_on:
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.gia_lap_tv_phong_khach
+      turn_off:
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.gia_lap_tv_phong_khach

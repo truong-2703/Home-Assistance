@@ -1,0 +1,39 @@
+# TruongHA - Demo căn hộ thông minh 2 phòng ngủ (gia đình anh Minh)
+# Toàn bộ thiết bị là giả lập; xem docs/kich-ban-demo.md để biết diễn biến demo.
+
+homeassistant:
+  name: Căn hộ nhà anh Minh
+  latitude: 10.7769
+  longitude: 106.7009
+  elevation: 10
+  unit_system: metric
+  currency: VND
+  country: VN
+  language: vi
+  time_zone: Asia/Ho_Chi_Minh
+  packages: !include_dir_named packages
+
+default_config:
+
+frontend:
+  themes: !include_dir_merge_named themes
+
+recorder:
+  purge_keep_days: 3
+
+lovelace:
+  mode: storage
+  dashboards:
+    truongha-nha:
+      mode: yaml
+      title: TruongHA
+      icon: mdi:home-heart
+      show_in_sidebar: true
+      filename: dashboards/truongha.yaml
+    truongha-demo:
+      mode: yaml
+      title: Điều khiển demo
+      icon: mdi:presentation-play
+      show_in_sidebar: true
+      require_admin: true
+      filename: dashboards/dieu_khien_demo.yaml

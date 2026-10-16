@@ -1,0 +1,243 @@
+# An ninh: hệ thống báo động, camera cửa chính, mã mở cửa tạm cho người giúp việc,
+# cảnh báo khói và gas.
+
+alarm_control_panel:
+  - platform: manual
+    name: "An ninh căn hộ"
+    unique_id: truongha_alarm_an_ninh
+    arming_time: 0
+    delay_time: 0
+    trigger_time: 600
+    disarm_after_trigger: false
+    code_arm_required: false
+
+input_boolean:
+  gia_lap_camera_co_nguoi:
+    name: "[Giả lập] Camera thấy người lạ"
+    initial: false
+
+# Camera giả lập: ảnh tĩnh, đổi sang ảnh "có người" khi phát hiện đột nhập.
+# Khi có camera thật, thay bằng entity camera của thiết bị.
+template:
+  - image:
+      - name: "Camera cửa chính"
+        unique_id: truongha_camera_cua_chinh
+        default_entity_id: image.camera_cua_chinh
+        url: >
+          http://127.0.0.1:8123/local/camera/{{ 'co_nguoi' if is_state('input_boolean.gia_lap_camera_co_nguoi', 'on') else 'hanh_lang_trong' }}.png
+
+input_text:
+  ten_nguoi_giup_viec:
+    name: "Tên người giúp việc"
+    initial: "Chị Lan"
+    max: 40
+  ma_tam_nguoi_giup_viec:
+    name: "Mã mở cửa tạm"
+    initial: "4826"
+    min: 4
+    max: 8
+    pattern: "[0-9]*"
+
+input_datetime:
+  ma_tam_tu:
+    name: "Mã tạm hiệu lực từ"
+    has_date: false
+    has_time: true
+    initial: "09:00"
+  ma_tam_den:
+    name: "Mã tạm hiệu lực đến"
+    has_date: false
+    has_time: true
+    initial: "11:00"
+
+script:
+  mo_cua_bang_ma_tam:
+    alias: "Mở cửa bằng mã tạm"
+    icon: mdi:dialpad
+    description: "Mô phỏng người giúp việc nhập mã tạm trên khóa cửa."
+    mode: queued
+    variables:
+      gio: "{{ states('input_datetime.gio_kich_ban')[:5] }}"
+      tu: "{{ states('input_datetime.ma_tam_tu')[:5] }}"
+      den: "{{ states('input_datetime.ma_tam_den')[:5] }}"
+      ten: "{{ states('input_text.ten_nguoi_giup_viec') }}"
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ tu <= gio <= den }}"
+        then:
+          - action: alarm_control_panel.alarm_disarm
+            target:
+              entity_id: alarm_control_panel.an_ninh_can_ho
+          - action: lock.unlock
+            target:
+              entity_id: lock.khoa_cua_chinh
+          - delay: 1
+          - action: script.mo_dong_cua_chinh
+          - action: script.truongha_thong_bao
+            data:
+              tieu_de: "{{ ten }} đã vào nhà"
+              noi_dung: "{{ ten }} mở cửa bằng mã tạm lúc {{ gio }} (mã chỉ có hiệu lực {{ tu }}–{{ den }}). Hệ thống an ninh tạm tắt."
+              muc_do: info
+        else:
+          - action: script.truongha_thong_bao
+            data:
+              tieu_de: "Mã tạm bị từ chối"
+              noi_dung: "Có người nhập mã tạm lúc {{ gio }}, ngoài khung giờ cho phép {{ tu }}–{{ den }}. Cửa vẫn khóa, an ninh vẫn bật."
+              muc_do: warning
+
+  mo_dong_cua_chinh:
+    alias: "Mở rồi đóng cửa chính"
+    icon: mdi:door-open
+    description: "Cảm biến cửa báo mở trong 3 giây rồi đóng lại."
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.gia_lap_cua_chinh
+      - delay: 3
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.gia_lap_cua_chinh
+
+automation:
+  - id: truongha_dot_nhap
+    alias: "An ninh: cửa mở khi cả nhà đi vắng"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.cua_chinh
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: alarm_control_panel.an_ninh_can_ho
+        state: armed_away
+    actions:
+      - action: alarm_control_panel.alarm_trigger
+        target:
+          entity_id: alarm_control_panel.an_ninh_can_ho
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.gia_lap_camera_co_nguoi
+      - action: switch.turn_on
+        target:
+          entity_id: switch.coi_bao_dong
+      - action: script.truongha_thong_bao
+        data:
+          tieu_de: "CẢNH BÁO: cửa chính bị mở!"
+          noi_dung: "Cửa chính bị mở lúc {{ states('input_datetime.gio_kich_ban')[:5] }} khi cả nhà đi vắng. Đã chụp ảnh camera, bật còi và nháy đèn."
+          muc_do: critical
+          hinh_anh: /local/camera/co_nguoi.png
+      - repeat:
+          count: 6
+          sequence:
+            - action: light.toggle
+              target:
+                entity_id:
+                  - light.den_phong_khach
+                  - light.den_hanh_lang
+            - delay:
+                milliseconds: 700
+      - action: light.turn_on
+        target:
+          entity_id:
+            - light.den_phong_khach
+            - light.den_hanh_lang
+
+  - id: truongha_tat_bao_dong
+    alias: "An ninh: tắt còi khi chủ nhà tắt báo động"
+    triggers:
+      - trigger: state
+        entity_id: alarm_control_panel.an_ninh_can_ho
+        from: triggered
+    actions:
+      - if:
+          - condition: state
+            entity_id: binary_sensor.khoi_bep
+            state: "off"
+          - condition: state
+            entity_id: binary_sensor.gas_bep
+            state: "off"
+        then:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.coi_bao_dong
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.gia_lap_camera_co_nguoi
+
+  - id: truongha_bao_khoi
+    alias: "An toàn: phát hiện khói trong bếp"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.khoi_bep
+        to: "on"
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.coi_bao_dong
+      # Bật đèn toàn nhà để dễ thoát hiểm, mở khóa cửa, tắt điều hòa để khói không lan
+      - action: light.turn_on
+        target:
+          entity_id: all
+      - action: lock.unlock
+        target:
+          entity_id: lock.khoa_cua_chinh
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: all
+        data:
+          hvac_mode: "off"
+      - action: script.truongha_thong_bao
+        data:
+          tieu_de: "KHẨN CẤP: phát hiện khói trong bếp!"
+          noi_dung: "Đã bật còi, bật toàn bộ đèn, mở khóa cửa chính để thoát hiểm và tắt điều hòa để khói không lan. Hãy kiểm tra bếp ngay."
+          muc_do: critical
+
+  - id: truongha_bao_gas
+    alias: "An toàn: phát hiện rò rỉ gas"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.gas_bep
+        to: "on"
+    actions:
+      # Cố ý KHÔNG bật/tắt đèn hay thiết bị điện: công tắc có thể tạo tia lửa khi có gas.
+      - action: switch.turn_on
+        target:
+          entity_id: switch.coi_bao_dong
+      - action: lock.unlock
+        target:
+          entity_id: lock.khoa_cua_chinh
+      - action: script.truongha_thong_bao
+        data:
+          tieu_de: "KHẨN CẤP: phát hiện rò rỉ gas!"
+          noi_dung: "Đã bật còi và mở khóa cửa chính. Hệ thống KHÔNG bật/tắt đèn để tránh tia lửa điện. Khóa van gas, mở cửa sổ, không dùng lửa hay công tắc điện, ra khỏi nhà."
+          muc_do: critical
+
+  - id: truongha_het_su_co
+    alias: "An toàn: hết khói và gas thì tắt còi"
+    triggers:
+      - trigger: state
+        entity_id:
+          - binary_sensor.khoi_bep
+          - binary_sensor.gas_bep
+        to: "off"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.khoi_bep
+        state: "off"
+      - condition: state
+        entity_id: binary_sensor.gas_bep
+        state: "off"
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: alarm_control_panel.an_ninh_can_ho
+            state: triggered
+    actions:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.coi_bao_dong
+      - action: script.truongha_thong_bao
+        data:
+          tieu_de: "Đã hết sự cố"
+          noi_dung: "Cảm biến khói và gas đã trở lại bình thường. Còi báo động đã tắt."
+          muc_do: success
