@@ -309,7 +309,7 @@ views:
               rows: 1
             tap_action:
               action: navigate
-              navigation_path: /truongha-home/nang-luong
+              navigation_path: /truongha-home/energy
       - type: grid
         cards:
           - type: heading
