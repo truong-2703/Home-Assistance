@@ -1,0 +1,254 @@
+# An ninh: hệ thống báo động, camera cửa chính, mã mở cửa tạm cho người giúp việc,
+# cảnh báo khói và gas.
+
+# Báo động lấy entity id từ "name" (tiếng Anh); tên hiển thị tiếng Việt đặt ở đây.
+homeassistant:
+  customize:
+    alarm_control_panel.apartment_security:
+      friendly_name: "Căn hộ · An ninh"
+
+alarm_control_panel:
+  - platform: manual
+    name: "Apartment Security"
+    unique_id: truongha_alarm_apartment_security
+    arming_time: 0
+    delay_time: 0
+    trigger_time: 600
+    disarm_after_trigger: false
+    code_arm_required: false
+
+input_boolean:
+  sim_front_door_camera_person:
+    name: "[Giả lập] Camera thấy người lạ"
+    initial: false
+
+# Camera giả lập: ảnh tĩnh, đổi sang ảnh "có người" khi phát hiện đột nhập.
+# Khi có camera thật, thay bằng entity camera của thiết bị.
+template:
+  - image:
+      - name: "Cửa chính · Camera"
+        unique_id: truongha_image_front_door_camera
+        default_entity_id: image.front_door_camera
+        url: >
+          http://127.0.0.1:8123/local/camera/{{ 'person_detected' if is_state('input_boolean.sim_front_door_camera_person', 'on') else 'hallway_empty' }}.png
+
+input_text:
+  housekeeper_name:
+    name: "Tên người giúp việc"
+    initial: "Chị Lan"
+    max: 40
+  housekeeper_temp_code:
+    name: "Mã mở cửa tạm"
+    initial: "4826"
+    min: 4
+    max: 8
+    pattern: "[0-9]*"
+
+input_datetime:
+  temp_code_valid_from:
+    name: "Mã tạm hiệu lực từ"
+    has_date: false
+    has_time: true
+    initial: "09:00"
+  temp_code_valid_to:
+    name: "Mã tạm hiệu lực đến"
+    has_date: false
+    has_time: true
+    initial: "11:00"
+
+script:
+  unlock_with_temp_code:
+    alias: "Mở cửa bằng mã tạm"
+    icon: mdi:dialpad
+    description: "Mô phỏng người giúp việc nhập mã tạm trên khóa cửa."
+    mode: queued
+    variables:
+      now_time: "{{ states('input_datetime.scenario_time')[:5] }}"
+      valid_from: "{{ states('input_datetime.temp_code_valid_from')[:5] }}"
+      valid_to: "{{ states('input_datetime.temp_code_valid_to')[:5] }}"
+      person_name: "{{ states('input_text.housekeeper_name') }}"
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ valid_from <= now_time <= valid_to }}"
+        then:
+          - action: alarm_control_panel.alarm_disarm
+            target:
+              entity_id: alarm_control_panel.apartment_security
+          - action: lock.unlock
+            target:
+              entity_id: lock.front_door_lock
+          - delay: 1
+          - action: script.open_close_front_door
+          - action: script.truongha_notify
+            data:
+              title: "{{ person_name }} đã vào nhà"
+              message: "{{ person_name }} mở cửa bằng mã tạm lúc {{ now_time }} (mã chỉ có hiệu lực {{ valid_from }}–{{ valid_to }}). Hệ thống an ninh tạm tắt."
+              level: info
+        else:
+          - action: script.truongha_notify
+            data:
+              title: "Mã tạm bị từ chối"
+              message: "Có người nhập mã tạm lúc {{ now_time }}, ngoài khung giờ cho phép {{ valid_from }}–{{ valid_to }}. Cửa vẫn khóa, an ninh vẫn bật."
+              level: warning
+
+  open_close_front_door:
+    alias: "Mở rồi đóng cửa chính"
+    icon: mdi:door-open
+    description: "Cảm biến cửa báo mở trong 3 giây rồi đóng lại."
+    sequence:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sim_front_door_contact
+      - delay: 3
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sim_front_door_contact
+
+automation:
+  - id: truongha_break_in
+    alias: "TruongHA break in"
+    description: "An ninh: cửa mở khi cả nhà đi vắng"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.front_door_contact
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: alarm_control_panel.apartment_security
+        state: armed_away
+    actions:
+      - action: alarm_control_panel.alarm_trigger
+        target:
+          entity_id: alarm_control_panel.apartment_security
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sim_front_door_camera_person
+      - action: switch.turn_on
+        target:
+          entity_id: switch.apartment_siren
+      - action: script.truongha_notify
+        data:
+          title: "CẢNH BÁO: cửa chính bị mở!"
+          message: "Cửa chính bị mở lúc {{ states('input_datetime.scenario_time')[:5] }} khi cả nhà đi vắng. Đã chụp ảnh camera, bật còi và nháy đèn."
+          level: critical
+          image: /local/camera/person_detected.png
+      - repeat:
+          count: 6
+          sequence:
+            - action: light.toggle
+              target:
+                entity_id:
+                  - light.living_room_main_light
+                  - light.hallway_light
+            - delay:
+                milliseconds: 700
+      - action: light.turn_on
+        target:
+          entity_id:
+            - light.living_room_main_light
+            - light.hallway_light
+
+  - id: truongha_alarm_disarmed
+    alias: "TruongHA alarm disarmed"
+    description: "An ninh: tắt còi khi chủ nhà tắt báo động"
+    triggers:
+      - trigger: state
+        entity_id: alarm_control_panel.apartment_security
+        from: triggered
+    actions:
+      - if:
+          - condition: state
+            entity_id: binary_sensor.kitchen_smoke
+            state: "off"
+          - condition: state
+            entity_id: binary_sensor.kitchen_gas
+            state: "off"
+        then:
+          - action: switch.turn_off
+            target:
+              entity_id: switch.apartment_siren
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sim_front_door_camera_person
+
+  - id: truongha_smoke_alert
+    alias: "TruongHA smoke alert"
+    description: "An toàn: phát hiện khói trong bếp"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.kitchen_smoke
+        to: "on"
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.apartment_siren
+      # Bật đèn toàn nhà để dễ thoát hiểm, mở khóa cửa, tắt điều hòa để khói không lan
+      - action: light.turn_on
+        target:
+          entity_id: all
+      - action: lock.unlock
+        target:
+          entity_id: lock.front_door_lock
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: all
+        data:
+          hvac_mode: "off"
+      - action: script.truongha_notify
+        data:
+          title: "KHẨN CẤP: phát hiện khói trong bếp!"
+          message: "Đã bật còi, bật toàn bộ đèn, mở khóa cửa chính để thoát hiểm và tắt điều hòa để khói không lan. Hãy kiểm tra bếp ngay."
+          level: critical
+
+  - id: truongha_gas_alert
+    alias: "TruongHA gas alert"
+    description: "An toàn: phát hiện rò rỉ gas"
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.kitchen_gas
+        to: "on"
+    actions:
+      # Cố ý KHÔNG bật/tắt đèn hay thiết bị điện: công tắc có thể tạo tia lửa khi có gas.
+      - action: switch.turn_on
+        target:
+          entity_id: switch.apartment_siren
+      - action: lock.unlock
+        target:
+          entity_id: lock.front_door_lock
+      - action: script.truongha_notify
+        data:
+          title: "KHẨN CẤP: phát hiện rò rỉ gas!"
+          message: "Đã bật còi và mở khóa cửa chính. Hệ thống KHÔNG bật/tắt đèn để tránh tia lửa điện. Khóa van gas, mở cửa sổ, không dùng lửa hay công tắc điện, ra khỏi nhà."
+          level: critical
+
+  - id: truongha_hazard_cleared
+    alias: "TruongHA hazard cleared"
+    description: "An toàn: hết khói và gas thì tắt còi"
+    triggers:
+      - trigger: state
+        entity_id:
+          - binary_sensor.kitchen_smoke
+          - binary_sensor.kitchen_gas
+        to: "off"
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.kitchen_smoke
+        state: "off"
+      - condition: state
+        entity_id: binary_sensor.kitchen_gas
+        state: "off"
+      - condition: not
+        conditions:
+          - condition: state
+            entity_id: alarm_control_panel.apartment_security
+            state: triggered
+    actions:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.apartment_siren
+      - action: script.truongha_notify
+        data:
+          title: "Đã hết sự cố"
+          message: "Cảm biến khói và gas đã trở lại bình thường. Còi báo động đã tắt."
+          level: success

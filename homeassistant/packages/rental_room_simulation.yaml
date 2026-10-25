@@ -1,28 +1,28 @@
-# Giả lập node ESPHome "phongtro-led-giuong" (esphome/phongtro-led-giuong.yaml) để chạy
-# automation trong phong_tro_den_tu_dong.yaml khi CHƯA có phần cứng.
+# Giả lập node ESPHome "rentalroom-bed-led" (esphome/rentalroom-bed-led.yaml) để chạy
+# automation trong rental_room_auto_light.yaml khi CHƯA có phần cứng.
 #
-# Entity id ở đây trùng đúng với entity id mà node thật tạo ra (friendly_name "LED Giuong"):
-#   light.led_giuong_den_led, binary_sensor.led_giuong_co_nguoi, sensor.led_giuong_do_sang_phong
+# Entity id ở đây trùng đúng với entity id mà node thật tạo ra (friendly_name "Rental Room Bed"):
+#   light.rental_room_bed_led_strip, binary_sensor.rental_room_bed_presence, sensor.rental_room_bed_illuminance
 #
 # KHI CÓ ESP32 THẬT: xóa file này, khởi động lại Home Assistant, vào
 # Cài đặt > Thực thể xóa 3 thực thể giả lập cũ, rồi thêm node ESPHome. Automation giữ nguyên.
 
 input_boolean:
-  gia_lap_led_giuong_den_led:
+  sim_rental_room_bed_led_strip:
     name: "[Giả lập] Phòng trọ · LED đang bật"
-  gia_lap_led_giuong_co_nguoi:
+  sim_rental_room_bed_presence:
     name: "[Giả lập] Phòng trọ · Có người"
     initial: false
 
 input_number:
-  gia_lap_led_giuong_do_sang_den:
+  sim_rental_room_bed_led_brightness:
     name: "[Giả lập] Phòng trọ · Độ sáng LED"
     min: 1
     max: 255
     step: 1
     initial: 204
     mode: box
-  gia_lap_led_giuong_do_sang_phong:
+  sim_rental_room_bed_illuminance:
     name: "[Giả lập] Phòng trọ · Độ sáng phòng"
     min: 0
     max: 1000
@@ -32,128 +32,128 @@ input_number:
     mode: slider
 
 input_text:
-  gia_lap_led_giuong_mau:
+  sim_rental_room_bed_led_color:
     name: "[Giả lập] Phòng trọ · Màu LED (r,g,b)"
     initial: "255,200,140"
     max: 20
 
 template:
   - light:
-      - name: "LED Giuong Đèn LED"
-        unique_id: gia_lap_led_giuong_den_led
-        default_entity_id: light.led_giuong_den_led
+      - name: "Phòng trọ · Đèn LED"
+        unique_id: sim_rental_room_bed_led_strip
+        default_entity_id: light.rental_room_bed_led_strip
         icon: mdi:led-strip-variant
-        state: "{{ is_state('input_boolean.gia_lap_led_giuong_den_led', 'on') }}"
-        level: "{{ states('input_number.gia_lap_led_giuong_do_sang_den') | int(204) }}"
-        rgb: "({{ states('input_text.gia_lap_led_giuong_mau') }})"
+        state: "{{ is_state('input_boolean.sim_rental_room_bed_led_strip', 'on') }}"
+        level: "{{ states('input_number.sim_rental_room_bed_led_brightness') | int(204) }}"
+        rgb: "({{ states('input_text.sim_rental_room_bed_led_color') }})"
         turn_on:
           - action: input_boolean.turn_on
             target:
-              entity_id: input_boolean.gia_lap_led_giuong_den_led
+              entity_id: input_boolean.sim_rental_room_bed_led_strip
         turn_off:
           - action: input_boolean.turn_off
             target:
-              entity_id: input_boolean.gia_lap_led_giuong_den_led
+              entity_id: input_boolean.sim_rental_room_bed_led_strip
         set_level:
           - action: input_number.set_value
             target:
-              entity_id: input_number.gia_lap_led_giuong_do_sang_den
+              entity_id: input_number.sim_rental_room_bed_led_brightness
             data:
               value: "{{ [brightness, 1] | max }}"
           - action: input_boolean.turn_on
             target:
-              entity_id: input_boolean.gia_lap_led_giuong_den_led
+              entity_id: input_boolean.sim_rental_room_bed_led_strip
         set_rgb:
           - action: input_text.set_value
             target:
-              entity_id: input_text.gia_lap_led_giuong_mau
+              entity_id: input_text.sim_rental_room_bed_led_color
             data:
               value: "{{ r }},{{ g }},{{ b }}"
           - action: input_boolean.turn_on
             target:
-              entity_id: input_boolean.gia_lap_led_giuong_den_led
+              entity_id: input_boolean.sim_rental_room_bed_led_strip
   - binary_sensor:
-      - name: "LED Giuong Có người"
-        unique_id: gia_lap_led_giuong_co_nguoi
-        default_entity_id: binary_sensor.led_giuong_co_nguoi
+      - name: "Phòng trọ · Có người"
+        unique_id: sim_rental_room_bed_presence
+        default_entity_id: binary_sensor.rental_room_bed_presence
         device_class: occupancy
-        state: "{{ is_state('input_boolean.gia_lap_led_giuong_co_nguoi', 'on') }}"
+        state: "{{ is_state('input_boolean.sim_rental_room_bed_presence', 'on') }}"
   - sensor:
-      - name: "LED Giuong Độ sáng phòng"
-        unique_id: gia_lap_led_giuong_do_sang_phong
-        default_entity_id: sensor.led_giuong_do_sang_phong
+      - name: "Phòng trọ · Độ sáng phòng"
+        unique_id: sim_rental_room_bed_illuminance
+        default_entity_id: sensor.rental_room_bed_illuminance
         device_class: illuminance
         state_class: measurement
         unit_of_measurement: lx
-        state: "{{ states('input_number.gia_lap_led_giuong_do_sang_phong') | float(0) }}"
+        state: "{{ states('input_number.sim_rental_room_bed_illuminance') | float(0) }}"
 
 script:
-  demo_phong_tro_khoi_phuc:
+  demo_rental_room_reset:
     alias: "Phòng trọ · Khôi phục"
     icon: mdi:restore
     sequence:
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_led_giuong_co_nguoi
-            - input_boolean.gia_lap_led_giuong_den_led
+            - input_boolean.sim_rental_room_bed_presence
+            - input_boolean.sim_rental_room_bed_led_strip
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_led_giuong_do_sang_phong
+          entity_id: input_number.sim_rental_room_bed_illuminance
         data:
           value: 200
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.den_tu_dong
+          entity_id: input_boolean.rental_room_auto_light
 
-  demo_phong_tro_vao_phong_toi:
+  demo_rental_room_enter_dark:
     alias: "Phòng trọ · Có người vào phòng lúc trời tối"
     icon: mdi:account-arrow-left
     sequence:
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_led_giuong_do_sang_phong
+          entity_id: input_number.sim_rental_room_bed_illuminance
         data:
           value: 8
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_led_giuong_co_nguoi
+          entity_id: input_boolean.sim_rental_room_bed_presence
 
-  demo_phong_tro_troi_toi_dan:
+  demo_rental_room_getting_dark:
     alias: "Phòng trọ · Đang ngồi trong phòng thì trời tối dần"
     icon: mdi:weather-sunset-down
     sequence:
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_led_giuong_den_led
+          entity_id: input_boolean.sim_rental_room_bed_led_strip
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_led_giuong_do_sang_phong
+          entity_id: input_number.sim_rental_room_bed_illuminance
         data:
           value: 250
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_led_giuong_co_nguoi
+          entity_id: input_boolean.sim_rental_room_bed_presence
       - delay: 2
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_led_giuong_do_sang_phong
+          entity_id: input_number.sim_rental_room_bed_illuminance
         data:
           value: 15
 
-  demo_phong_tro_roi_phong:
+  demo_rental_room_leave:
     alias: "Phòng trọ · Người rời phòng"
     icon: mdi:account-arrow-right
     sequence:
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_led_giuong_co_nguoi
+          entity_id: input_boolean.sim_rental_room_bed_presence
 
-  demo_phong_tro_nut_bam:
+  demo_rental_room_button:
     alias: "Phòng trọ · Bấm nút trên ESP32"
     icon: mdi:gesture-tap-button
     description: "Nút vật lý bật/tắt đèn ngay trên ESP, chạy cả khi Home Assistant hoặc WiFi chết."
     sequence:
       - action: light.toggle
         target:
-          entity_id: light.led_giuong_den_led
+          entity_id: light.rental_room_bed_led_strip

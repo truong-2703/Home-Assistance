@@ -3,8 +3,8 @@
 Hệ thống nhà thông minh tự làm, chạy local: **ESP32 + ESPHome** cho thiết bị, **Home Assistant** làm bộ não.
 Bắt đầu bằng đèn LED hắt sáng tự động, thiết kế dạng module để mở rộng dần (điều hoà, năng lượng, an ninh, trợ lý giọng nói).
 
-- Đánh giá ý tưởng gốc, kiến trúc và lộ trình: [`docs/de-xuat-he-thong.md`](docs/de-xuat-he-thong.md)
-- Node đầu tiên: [`esphome/phongtro-led-giuong.yaml`](esphome/phongtro-led-giuong.yaml)
+- Đánh giá ý tưởng gốc, kiến trúc và lộ trình: [`docs/system-proposal.md`](docs/system-proposal.md)
+- Node đầu tiên: [`esphome/rentalroom-bed-led.yaml`](esphome/rentalroom-bed-led.yaml)
 - Tự động hoá HA: [`homeassistant/packages/`](homeassistant/packages/)
 
 ---
@@ -12,7 +12,7 @@ Bắt đầu bằng đèn LED hắt sáng tự động, thiết kế dạng modu
 ## Demo TruongHA: căn hộ thông minh giả lập (không cần phần cứng)
 
 Bản demo căn hộ thông minh 2 phòng ngủ, chạy hoàn toàn bằng **thiết bị giả lập** nên không cần phần cứng.
-Kịch bản demo chi tiết nằm ở [docs/kich-ban-demo.md](docs/kich-ban-demo.md).
+Kịch bản demo chi tiết nằm ở [docs/demo-script.md](docs/demo-script.md).
 
 ### Chạy demo (khoảng 5 phút)
 
@@ -46,7 +46,7 @@ docker compose down                    # tắt demo
 
 ### Cách bố trí khi đi demo
 
-- **Màn hình lớn (máy chiếu/TV):** mở `http://localhost:8123/truongha-nha`.
+- **Màn hình lớn (máy chiếu/TV):** mở `http://localhost:8123/truongha-home`.
 - **Điện thoại hoặc tab khác của bạn:** mở `http://<IP-laptop>:8123/truongha-demo` để bấm chuyển cảnh mà khách không thấy.
   Tìm IP laptop bằng `ipconfig` (Windows) hoặc `ifconfig` (macOS/Linux); điện thoại phải cùng mạng Wi-Fi hoặc 4G phát từ laptop.
 - Muốn mở thẳng TruongHA khi vào trang: vào **Cài đặt → Bảng điều khiển**, chọn TruongHA và đặt làm mặc định.
@@ -54,8 +54,8 @@ docker compose down                    # tắt demo
 ### Nhận thông báo trên điện thoại (tùy chọn)
 
 1. Cài app **Home Assistant** (iOS/Android) và đăng nhập vào `http://<IP-laptop>:8123`.
-2. Vào **Cài đặt → Thiết bị & dịch vụ → Mobile App** và xem tên thiết bị, ví dụ `iphone_cua_truong`.
-3. Trên dashboard **Điều khiển demo**, ô **Gửi thông báo tới điện thoại** điền `mobile_app_iphone_cua_truong`.
+2. Vào **Cài đặt → Thiết bị & dịch vụ → Mobile App** và xem tên thiết bị, ví dụ `truong_iphone`.
+3. Trên dashboard **Điều khiển demo**, ô **Gửi thông báo tới điện thoại** điền `mobile_app_truong_iphone`.
 
 Từ đó mọi cảnh báo (cửa mở, khói, gas, ổ cắm bếp...) sẽ đẩy về điện thoại, có kèm nút "Tắt ngay" và "Khóa cửa".
 Thông báo đẩy cần laptop có internet.
@@ -69,40 +69,46 @@ esphome/                    Firmware node ESP32 thật (phòng trọ: LED, mmWav
 homeassistant/              Thư mục cấu hình Home Assistant DUY NHẤT của repo
   configuration.yaml        Cấu hình chính (múi giờ VN, tiếng Việt, VND, nạp mọi package)
   packages/
-    phong_tro_den_tu_dong.yaml  Automation đèn LED phòng trọ (dùng cho node ESP32 thật)
-    gia_lap_phong_tro.yaml      Giả lập node ESP32 phòng trọ - XÓA khi có phần cứng thật
-    thiet_bi.yaml           Thiết bị giả lập của căn hộ: đèn, ổ cắm, khóa, rèm, cảm biến, điều hòa, TV
-    an_ninh.yaml            Báo động, camera, mã tạm người giúp việc, khói và gas
-    kich_ban.yaml           Chế độ nhà, thông báo, automation sáng/đi vắng/về nhà/ban đêm
-    nang_luong.yaml         Công suất tiêu thụ, số liệu tiền điện minh họa
+    rental_room_auto_light.yaml  Automation đèn LED phòng trọ (dùng cho node ESP32 thật)
+    rental_room_simulation.yaml      Giả lập node ESP32 phòng trọ - XÓA khi có phần cứng thật
+    devices.yaml           Thiết bị giả lập của căn hộ: đèn, ổ cắm, khóa, rèm, cảm biến, điều hòa, TV
+    security.yaml            Báo động, camera, mã tạm người giúp việc, khói và gas
+    scenarios.yaml           Chế độ nhà, thông báo, automation sáng/đi vắng/về nhà/ban đêm
+    energy.yaml         Công suất tiêu thụ, số liệu tiền điện minh họa
     demo.yaml               Nút bấm chuyển cảnh cho người thuyết trình
   dashboards/
     truongha.yaml           Dashboard khách hàng (có tab Phòng trọ)
-    dieu_khien_demo.yaml    Dashboard người thuyết trình
+    demo_control.yaml    Dashboard người thuyết trình
   themes/truongha.yaml      Màu thương hiệu TruongHA
   www/                      Sơ đồ căn hộ, ảnh camera giả lập
-docs/kich-ban-demo.md       Kịch bản demo đã chốt
+docs/demo-script.md       Kịch bản demo đã chốt
 ```
 
 ### Quy ước đặt tên
 
-Theo nguyên tắc trong `docs/de-xuat-he-thong.md` (khu vực trước, chức năng sau):
+Theo nguyên tắc trong `docs/system-proposal.md`: khu vực trước, chức năng sau. **Mọi tên kỹ thuật dùng tiếng Anh**
+(entity id, helper, script, automation, tên file, node ESPHome); **tên hiển thị cho người dùng giữ tiếng Việt**.
 
-- **Node ESPHome:** `<khu-vuc>-<chuc-nang>`, ví dụ `phongtro-led-giuong`.
-- **Entity Home Assistant** (không dùng được dấu gạch ngang): `<khu_vuc>_<chuc_nang>`, tên hiển thị `Khu vực · Chức năng`.
-  Ví dụ `light.bep_den` (Bếp · Đèn), `climate.phong_khach_dieu_hoa`, `lock.cua_chinh_khoa`, `switch.can_ho_coi_bao_dong`.
-- Entity do node ESPHome tạo ra lấy theo `friendly_name` của node, ví dụ `light.led_giuong_den_led`.
+- **Node ESPHome:** `<area>-<function>`, ví dụ `rentalroom-bed-led` (friendly_name `Rental Room Bed`).
+- **Entity Home Assistant** (không dùng được dấu gạch ngang): `<area>_<function>`, tên hiển thị `Khu vực · Chức năng`.
+  Ví dụ `light.kitchen_light` (Bếp · Đèn), `climate.living_room_ac`, `lock.front_door_lock`, `switch.apartment_siren`.
+- **Khu vực:** `living_room`, `master_bedroom`, `kids_room`, `kitchen`, `bathroom`, `hallway`, `front_door`,
+  `apartment` (toàn căn hộ), `outdoor`, `rental_room`.
+- **Helper giả lập:** `sim_<entity>`, ví dụ `input_boolean.sim_kitchen_light` giữ trạng thái của `light.kitchen_light`.
+- Entity do node ESPHome tạo ra lấy theo `friendly_name` của node, ví dụ `light.rental_room_bed_led_strip`.
+  Entity nào lấy id từ tên (node ESPHome, điều hòa, TV, báo động) thì đặt tên tiếng Anh và đổi tên hiển thị
+  sang tiếng Việt bằng `homeassistant: customize:` trong package.
 
 ### Cách giả lập hoạt động
 
-- Mỗi thiết bị (ví dụ `light.bep_den`) là một thiết bị template, lưu trạng thái trong helper ẩn `input_boolean.gia_lap_*`.
+- Mỗi thiết bị (ví dụ `light.kitchen_light`) là một thiết bị template, lưu trạng thái trong helper ẩn `input_boolean.sim_*`.
   Automation và dashboard chỉ dùng entity thiết bị, không dùng helper, nên khi có phần cứng thật
   chỉ cần thay thiết bị ảo bằng thiết bị thật **cùng entity_id**.
-- **Phòng trọ:** `gia_lap_phong_tro.yaml` giả lập node `esphome/phongtro-led-giuong.yaml` với đúng entity id node thật
-  sẽ tạo, nên automation thật `phong_tro_den_tu_dong.yaml` chạy được ngay trong demo. Khi flash ESP32 thật:
+- **Phòng trọ:** `rental_room_simulation.yaml` giả lập node `esphome/rentalroom-bed-led.yaml` với đúng entity id node thật
+  sẽ tạo, nên automation thật `rental_room_auto_light.yaml` chạy được ngay trong demo. Khi flash ESP32 thật:
   xóa file giả lập, khởi động lại Home Assistant, xóa 3 thực thể giả lập cũ trong **Cài đặt → Thực thể**,
   rồi thêm node ESPHome. Automation giữ nguyên.
-- **Giờ trong kịch bản** (`input_datetime.gio_kich_ban`) thay cho giờ thật, để tua tới 6:30, 14:00, 22:30... mà không phải chờ.
+- **Giờ trong kịch bản** (`input_datetime.scenario_time`) thay cho giờ thật, để tua tới 6:30, 14:00, 22:30... mà không phải chờ.
   Khi lắp nhà thật, đổi trigger sang giờ thật (`trigger: time`).
 - Điều hòa dùng `generic_thermostat`: nhiệt độ phòng giảm khi máy nén chạy và tăng dần về nhiệt độ ngoài trời khi tắt.
 - Công suất điện được ước tính theo thiết bị đang bật. Số liệu tiền điện tháng là **minh họa**.

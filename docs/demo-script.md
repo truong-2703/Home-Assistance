@@ -45,7 +45,7 @@
 ## Phụ lục: đèn LED phòng trọ (node ESP32 tự làm)
 
 Dùng khi khách quan tâm đến thiết bị tự làm, giá rẻ. Mở tab **Phòng trọ**, dùng các nút ở mục "Phụ lục" trên dashboard Điều khiển demo.
-Node đang giả lập. Khi có ESP32 thật (`esphome/phongtro-led-giuong.yaml`) thì đặt node lên bàn để demo trực tiếp.
+Node đang giả lập. Khi có ESP32 thật (`esphome/rentalroom-bed-led.yaml`) thì đặt node lên bàn để demo trực tiếp.
 
 | Nút bấm | Kết quả | Điểm nhấn |
 |---|---|---|

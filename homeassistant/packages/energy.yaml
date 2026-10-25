@@ -1,0 +1,61 @@
+# Năng lượng: công suất tức thời ước tính theo trạng thái thiết bị (giả lập đồng hồ điện),
+# và số liệu MINH HỌA so sánh tiền điện một tháng có / không có tự động hóa.
+
+template:
+  - sensor:
+      - name: "Căn hộ · Công suất"
+        unique_id: truongha_apartment_power
+        default_entity_id: sensor.apartment_power
+        device_class: power
+        state_class: measurement
+        unit_of_measurement: W
+        # Tủ lạnh, router, thiết bị chờ... luôn khoảng 150 W
+        state: >
+          {% set w = namespace(total=150) %}
+          {% for e, watts in [
+            ('light.living_room_main_light', 18), ('light.living_room_accent_light', 12), ('light.master_bedroom_ceiling_light', 15),
+            ('light.master_bedroom_night_light', 6), ('light.kids_room_light', 15), ('light.kitchen_light', 12),
+            ('light.bathroom_light', 9), ('light.hallway_light', 9),
+            ('switch.kitchen_kettle_plug', 1800), ('switch.kitchen_rice_cooker_plug', 650),
+            ('switch.bathroom_water_heater', 2500), ('media_player.living_room_tv', 120),
+            ('switch.living_room_ac_compressor', 1100), ('switch.master_bedroom_ac_compressor', 800),
+            ('switch.kids_room_ac_compressor', 800) ] %}
+            {% if is_state(e, 'on') %}{% set w.total = w.total + watts %}{% endif %}
+          {% endfor %}
+          {# Điều hòa bật nhưng máy nén đang nghỉ: chỉ còn quạt dàn lạnh ~40 W #}
+          {% for p in ['living_room', 'master_bedroom', 'kids_room'] %}
+            {% if not is_state('climate.' ~ p ~ '_ac', 'off')
+                  and is_state('switch.' ~ p ~ '_ac_compressor', 'off') %}
+              {% set w.total = w.total + 40 %}
+            {% endif %}
+          {% endfor %}
+          {{ w.total }}
+
+      - name: "Căn hộ · Điện năng tháng trước (chưa có TruongHA)"
+        unique_id: truongha_apartment_energy_last_month
+        default_entity_id: sensor.apartment_energy_last_month
+        icon: mdi:flash-outline
+        unit_of_measurement: kWh
+        state: "412"
+
+      - name: "Căn hộ · Điện năng tháng này (có TruongHA)"
+        unique_id: truongha_apartment_energy_this_month
+        default_entity_id: sensor.apartment_energy_this_month
+        icon: mdi:flash
+        unit_of_measurement: kWh
+        state: "348"
+
+sensor:
+  - platform: integration
+    name: "Apartment Energy Demo"
+    unique_id: truongha_apartment_energy_demo
+    source: sensor.apartment_power
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: left
+
+homeassistant:
+  customize:
+    sensor.apartment_energy_demo:
+      friendly_name: "Căn hộ · Điện năng buổi demo"

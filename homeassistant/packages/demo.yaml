@@ -1,251 +1,251 @@
 # Nút bấm cho người thuyết trình (dashboard "Điều khiển demo").
 # Mỗi script chỉ làm những gì ngoài đời tự xảy ra: giờ trôi, người đi/về, cửa mở, có khói...
-# Phản ứng của căn hộ là do các automation thật trong kich_ban.yaml và an_ninh.yaml.
+# Phản ứng của căn hộ là do các automation thật trong scenarios.yaml và security.yaml.
 
 script:
-  demo_dat_gio:
+  demo_set_time:
     alias: "Demo: đặt giờ kịch bản"
     mode: queued
     fields:
-      gio:
+      at_time:
         description: "HH:MM"
     sequence:
       - action: input_datetime.set_datetime
         target:
-          entity_id: input_datetime.gio_kich_ban
+          entity_id: input_datetime.scenario_time
         data:
-          time: "{{ gio }}:00"
+          time: "{{ at_time }}:00"
 
-  demo_khoi_phuc:
+  demo_reset:
     alias: "Khôi phục từ đầu (5:55 sáng)"
     icon: mdi:restore
     sequence:
       - action: automation.turn_off
         target:
           entity_id:
-            - automation.di_vang_tat_het_khoa_cua_bat_an_ninh
-            - automation.an_toan_het_khoi_va_gas_thi_tat_coi
-            - automation.an_ninh_tat_coi_khi_chu_nha_tat_bao_dong
+            - automation.truongha_leave_home
+            - automation.truongha_hazard_cleared
+            - automation.truongha_alarm_disarmed
         data:
           stop_actions: true
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "05:55"
+          at_time: "05:55"
       - action: input_select.select_option
         target:
-          entity_id: input_select.che_do_nha
+          entity_id: input_select.home_mode
         data:
           option: "Ban đêm"
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_phong_khach_den_chinh
-            - input_boolean.gia_lap_phong_khach_den_trang_tri
-            - input_boolean.gia_lap_phong_ngu_master_den_tran
-            - input_boolean.gia_lap_phong_ngu_master_den_ngu
-            - input_boolean.gia_lap_phong_be_den
-            - input_boolean.gia_lap_bep_den
-            - input_boolean.gia_lap_nha_tam_den
-            - input_boolean.gia_lap_hanh_lang_den
-            - input_boolean.gia_lap_bep_o_cam_am_sieu_toc
-            - input_boolean.gia_lap_bep_o_cam_noi_com
-            - input_boolean.gia_lap_nha_tam_binh_nong_lanh
-            - input_boolean.gia_lap_can_ho_coi_bao_dong
-            - input_boolean.gia_lap_phong_khach_rem
-            - input_boolean.gia_lap_phong_ngu_master_rem
-            - input_boolean.gia_lap_cua_chinh_cam_bien_cua
-            - input_boolean.gia_lap_hanh_lang_chuyen_dong
-            - input_boolean.gia_lap_bep_khoi
-            - input_boolean.gia_lap_bep_gas
-            - input_boolean.gia_lap_phong_khach_tv
-            - input_boolean.co_thong_bao
+            - input_boolean.sim_living_room_main_light
+            - input_boolean.sim_living_room_accent_light
+            - input_boolean.sim_master_bedroom_ceiling_light
+            - input_boolean.sim_master_bedroom_night_light
+            - input_boolean.sim_kids_room_light
+            - input_boolean.sim_kitchen_light
+            - input_boolean.sim_bathroom_light
+            - input_boolean.sim_hallway_light
+            - input_boolean.sim_kitchen_kettle_plug
+            - input_boolean.sim_kitchen_rice_cooker_plug
+            - input_boolean.sim_bathroom_water_heater
+            - input_boolean.sim_apartment_siren
+            - input_boolean.sim_living_room_curtain
+            - input_boolean.sim_master_bedroom_curtain
+            - input_boolean.sim_front_door_contact
+            - input_boolean.sim_hallway_motion
+            - input_boolean.sim_kitchen_smoke
+            - input_boolean.sim_kitchen_gas
+            - input_boolean.sim_living_room_tv
+            - input_boolean.notification_visible
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh_khoa
+          entity_id: input_boolean.sim_front_door_lock
       - action: input_number.set_value
         target:
-          entity_id: input_number.khoang_cach_ve_nha
+          entity_id: input_number.distance_to_home
         data:
           value: 0
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_phong_khach_nhiet_do
+          entity_id: input_number.sim_living_room_temperature
         data:
           value: 29
       - action: input_number.set_value
         target:
           entity_id:
-            - input_number.gia_lap_phong_ngu_master_nhiet_do
-            - input_number.gia_lap_phong_be_nhiet_do
+            - input_number.sim_master_bedroom_temperature
+            - input_number.sim_kids_room_temperature
         data:
           value: 26.2
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_ngoai_troi_nhiet_do
+          entity_id: input_number.sim_outdoor_temperature
         data:
           value: 27
       - action: climate.set_hvac_mode
         target:
-          entity_id: climate.phong_khach_dieu_hoa
+          entity_id: climate.living_room_ac
         data:
           hvac_mode: "off"
       - action: climate.set_hvac_mode
         target:
           entity_id:
-            - climate.phong_ngu_master_dieu_hoa
-            - climate.phong_be_dieu_hoa
+            - climate.master_bedroom_ac
+            - climate.kids_room_ac
         data:
           hvac_mode: cool
       - action: climate.set_preset_mode
         target:
           entity_id:
-            - climate.phong_ngu_master_dieu_hoa
-            - climate.phong_be_dieu_hoa
+            - climate.master_bedroom_ac
+            - climate.kids_room_ac
         data:
           preset_mode: sleep
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_camera_co_nguoi
+          entity_id: input_boolean.sim_front_door_camera_person
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.can_ho_an_ninh
+          entity_id: alarm_control_panel.apartment_security
       - action: alarm_control_panel.alarm_arm_night
         target:
-          entity_id: alarm_control_panel.can_ho_an_ninh
+          entity_id: alarm_control_panel.apartment_security
       - action: persistent_notification.dismiss_all
       - action: automation.turn_on
         target:
           entity_id:
-            - automation.di_vang_tat_het_khoa_cua_bat_an_ninh
-            - automation.an_toan_het_khoi_va_gas_thi_tat_coi
-            - automation.an_ninh_tat_coi_khi_chu_nha_tat_bao_dong
-      - action: script.demo_phong_tro_khoi_phuc
+            - automation.truongha_leave_home
+            - automation.truongha_hazard_cleared
+            - automation.truongha_alarm_disarmed
+      - action: script.demo_rental_room_reset
 
-  demo_canh_1_buoi_sang:
+  demo_scene_1_morning:
     alias: "Cảnh 1 · 6:00 → 6:30 Buổi sáng"
     icon: mdi:weather-sunset-up
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "06:00"
+          at_time: "06:00"
       - delay: 3
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "06:30"
+          at_time: "06:30"
       - delay: 6
       # Chị Hà xuống bếp đun nước pha sữa cho bé
       - action: light.turn_on
         target:
-          entity_id: light.bep_den
+          entity_id: light.kitchen_light
       - action: switch.turn_on
         target:
-          entity_id: switch.bep_o_cam_am_sieu_toc
+          entity_id: switch.kitchen_kettle_plug
 
-  demo_canh_2_di_vang:
+  demo_scene_2_leave_home:
     alias: "Cảnh 2 · 7:30 Cả nhà ra khỏi nhà"
     icon: mdi:home-export-outline
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "07:30"
+          at_time: "07:30"
       - action: input_number.set_value
         target:
-          entity_id: input_number.khoang_cach_ve_nha
+          entity_id: input_number.distance_to_home
         data:
           value: 8
-      - action: script.che_do_di_vang
+      - action: script.mode_away
 
-  demo_canh_3_giup_viec_vao:
+  demo_scene_3_housekeeper_arrives:
     alias: "Cảnh 3 · 9:05 Chị Lan mở cửa bằng mã tạm"
     icon: mdi:account-key
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "09:05"
-      - action: script.mo_cua_bang_ma_tam
+          at_time: "09:05"
+      - action: script.unlock_with_temp_code
 
-  demo_canh_3_giup_viec_ve:
+  demo_scene_3_housekeeper_leaves:
     alias: "Cảnh 3 · 11:00 Chị Lan ra về"
     icon: mdi:account-arrow-right
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "11:00"
-      - action: script.mo_dong_cua_chinh
+          at_time: "11:00"
+      - action: script.open_close_front_door
       - action: lock.lock
         target:
-          entity_id: lock.cua_chinh_khoa
+          entity_id: lock.front_door_lock
       - action: alarm_control_panel.alarm_arm_away
         target:
-          entity_id: alarm_control_panel.can_ho_an_ninh
-      - action: script.truongha_thong_bao
+          entity_id: alarm_control_panel.apartment_security
+      - action: script.truongha_notify
         data:
-          tieu_de: "{{ states('input_text.ten_nguoi_giup_viec') }} đã ra về"
-          noi_dung: "Cửa chính đã tự khóa và hệ thống an ninh bật lại lúc 11:00."
-          muc_do: info
+          title: "{{ states('input_text.housekeeper_name') }} đã ra về"
+          message: "Cửa chính đã tự khóa và hệ thống an ninh bật lại lúc 11:00."
+          level: info
 
-  demo_canh_3_ma_tam_ngoai_gio:
+  demo_scene_3_code_outside_hours:
     alias: "Cảnh 3 · 12:30 Có người thử mã tạm ngoài giờ"
     icon: mdi:account-cancel
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "12:30"
-      - action: script.mo_cua_bang_ma_tam
+          at_time: "12:30"
+      - action: script.unlock_with_temp_code
 
-  demo_canh_3_dot_nhap:
+  demo_scene_3_break_in:
     alias: "Cảnh 3 · 14:00 Cửa chính bị mở"
     icon: mdi:door-open
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "14:00"
+          at_time: "14:00"
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_ngoai_troi_nhiet_do
+          entity_id: input_number.sim_outdoor_temperature
         data:
           value: 34
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh_cam_bien_cua
+          entity_id: input_boolean.sim_front_door_contact
       - delay: 4
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh_cam_bien_cua
+          entity_id: input_boolean.sim_front_door_contact
 
-  demo_canh_4_khoi:
+  demo_scene_4_smoke:
     alias: "Cảnh 4 · Có khói trong bếp"
     icon: mdi:smoke-detector-alert
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "15:30"
+          at_time: "15:30"
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_bep_khoi
+          entity_id: input_boolean.sim_kitchen_smoke
 
-  demo_canh_4_gas:
+  demo_scene_4_gas:
     alias: "Cảnh 4 · Rò rỉ gas"
     icon: mdi:gas-cylinder
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "16:00"
+          at_time: "16:00"
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_bep_gas
+          entity_id: input_boolean.sim_kitchen_gas
 
-  demo_canh_4_het_su_co:
+  demo_scene_4_all_clear:
     alias: "Cảnh 4 · Hết khói / gas"
     icon: mdi:check-circle
     sequence:
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_bep_khoi
-            - input_boolean.gia_lap_bep_gas
+            - input_boolean.sim_kitchen_smoke
+            - input_boolean.sim_kitchen_gas
 
-  demo_canh_5_sap_ve:
+  demo_scene_5_almost_home:
     alias: "Cảnh 5 · 18:00 Anh Minh còn 2 km"
     icon: mdi:car-arrow-left
     sequence:
@@ -253,11 +253,11 @@ script:
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_bep_khoi
-            - input_boolean.gia_lap_bep_gas
+            - input_boolean.sim_kitchen_smoke
+            - input_boolean.sim_kitchen_gas
       - action: switch.turn_off
         target:
-          entity_id: switch.can_ho_coi_bao_dong
+          entity_id: switch.apartment_siren
       - action: light.turn_off
         target:
           entity_id: all
@@ -268,93 +268,93 @@ script:
           hvac_mode: "off"
       - action: lock.lock
         target:
-          entity_id: lock.cua_chinh_khoa
+          entity_id: lock.front_door_lock
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.can_ho_an_ninh
+          entity_id: alarm_control_panel.apartment_security
       - action: alarm_control_panel.alarm_arm_away
         target:
-          entity_id: alarm_control_panel.can_ho_an_ninh
+          entity_id: alarm_control_panel.apartment_security
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_camera_co_nguoi
+          entity_id: input_boolean.sim_front_door_camera_person
       - action: input_select.select_option
         target:
-          entity_id: input_select.che_do_nha
+          entity_id: input_select.home_mode
         data:
           option: "Đi vắng"
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "18:00"
+          at_time: "18:00"
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_ngoai_troi_nhiet_do
+          entity_id: input_number.sim_outdoor_temperature
         data:
           value: 31
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_phong_khach_nhiet_do
+          entity_id: input_number.sim_living_room_temperature
         data:
           value: 32
       - action: input_number.set_value
         target:
-          entity_id: input_number.khoang_cach_ve_nha
+          entity_id: input_number.distance_to_home
         data:
           value: 8
       - delay: 1
       - action: input_number.set_value
         target:
-          entity_id: input_number.khoang_cach_ve_nha
+          entity_id: input_number.distance_to_home
         data:
           value: 2
 
-  demo_canh_5_mo_cua:
+  demo_scene_5_arrive_home:
     alias: "Cảnh 5 · 18:15 Anh Minh mở cửa về nhà"
     icon: mdi:home-import-outline
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "18:15"
+          at_time: "18:15"
       - action: input_number.set_value
         target:
-          entity_id: input_number.khoang_cach_ve_nha
+          entity_id: input_number.distance_to_home
         data:
           value: 0
       - action: lock.unlock
         target:
-          entity_id: lock.cua_chinh_khoa
+          entity_id: lock.front_door_lock
       - delay: 2
-      - action: script.mo_dong_cua_chinh
+      - action: script.open_close_front_door
 
-  demo_canh_6_xem_phim:
+  demo_scene_6_movie:
     alias: "Cảnh 6 · 20:00 Xem phim"
     icon: mdi:movie-open
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "20:00"
-      - action: script.che_do_xem_phim
+          at_time: "20:00"
+      - action: script.mode_movie
 
-  demo_canh_6_di_ngu:
+  demo_scene_6_bedtime:
     alias: "Cảnh 6 · 22:30 Đi ngủ"
     icon: mdi:bed
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "22:30"
-      - action: script.che_do_di_ngu
+          at_time: "22:30"
+      - action: script.mode_sleep
 
-  demo_canh_6_dem:
+  demo_scene_6_night_walk:
     alias: "Cảnh 6 · 2:00 Có người dậy đi vệ sinh"
     icon: mdi:walk
     sequence:
-      - action: script.demo_dat_gio
+      - action: script.demo_set_time
         data:
-          gio: "02:00"
+          at_time: "02:00"
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_hanh_lang_chuyen_dong
+          entity_id: input_boolean.sim_hallway_motion
       - delay: 4
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_hanh_lang_chuyen_dong
+          entity_id: input_boolean.sim_hallway_motion

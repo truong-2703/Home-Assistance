@@ -1,5 +1,5 @@
 # TruongHA - Demo căn hộ thông minh 2 phòng ngủ (gia đình anh Minh)
-# Toàn bộ thiết bị là giả lập; xem docs/kich-ban-demo.md để biết diễn biến demo.
+# Toàn bộ thiết bị là giả lập; xem docs/demo-script.md để biết diễn biến demo.
 
 homeassistant:
   name: Căn hộ nhà anh Minh
@@ -24,7 +24,7 @@ recorder:
 lovelace:
   mode: storage
   dashboards:
-    truongha-nha:
+    truongha-home:
       mode: yaml
       title: TruongHA
       icon: mdi:home-heart
@@ -36,4 +36,4 @@ lovelace:
       icon: mdi:presentation-play
       show_in_sidebar: true
       require_admin: true
-      filename: dashboards/dieu_khien_demo.yaml
+      filename: dashboards/demo_control.yaml

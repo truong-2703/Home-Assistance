@@ -55,13 +55,13 @@ Bài của J-Rat Techworks ("I Built Hidden Smart LED Lighting for My Office Des
 2. **Chỉ local, không cloud.** Ưu tiên ESPHome → Zigbee → MQTT. Tránh thiết bị chỉ chạy qua app cloud (Tuya cloud...).
 3. **Node "tự lo được" khi mất kết nối.** Chức năng cốt lõi (bật/tắt đèn bằng nút) chạy ngay trên ESP; HA chỉ thêm phần thông minh.
 4. **Cấu hình dạng module (ESPHome packages).** Phần chung (WiFi, API, OTA) viết một lần; mỗi tính năng (LED, mmWave, lux, nút) là một file. Thêm thiết bị mới = copy file node, đổi vài dòng `substitutions`.
-5. **Quy ước đặt tên nhất quán:** `<khu-vuc>-<chuc-nang>` — ví dụ `phongtro-led-giuong`, `phongtro-ir-dieuhoa`, `bep-cambien-khoi`. Area trong HA đặt đúng từ đầu.
+5. **Quy ước đặt tên nhất quán:** `<area>-<function>` bằng tiếng Anh — ví dụ `rentalroom-bed-led`, `rentalroom-ir-aircon`, `kitchen-smoke-sensor`. Area trong HA đặt đúng từ đầu.
 6. **Mọi thứ trong Git** (repo này): cấu hình ESPHome, package HA, tài liệu. `secrets.yaml` không bao giờ commit. Chuyển trọ / hỏng máy = clone lại và flash.
 7. **Mạng IoT riêng.** Một router nhỏ (chế độ router, không phải repeater) cắm vào mạng chủ trọ. Thiết bị IoT + server HA ở trong mạng của bạn → IP cố định, mDNS hoạt động, đổi WiFi chủ trọ không ảnh hưởng.
 
 ## 4. Node đầu tiên: đèn LED hắt sáng giường/bàn
 
-Đã có cấu hình sẵn trong repo, kiểm tra hợp lệ với ESPHome 2026.9 (`esphome/phongtro-led-giuong.yaml`).
+Đã có cấu hình sẵn trong repo, kiểm tra hợp lệ với ESPHome 2026.9 (`esphome/rentalroom-bed-led.yaml`).
 
 ### Phần cứng
 
@@ -97,14 +97,14 @@ Dải dài: cấp nguồn thêm ở cuối dải (và giữa nếu > 5 m). Firmw
 - **Không còn người 3 phút** → tự tắt (mmWave nên ngồi im làm việc không bị tắt).
 - **Nút bấm:** nhấn nhanh = bật/tắt; giữ 1 giây = chế độ ngủ. Chạy cả khi HA/WiFi chết.
 - Công tắc `Đèn tự động` trong HA để tắt tự động khi cần.
-- Web UI tại `http://phongtro-led-giuong.local` làm phương án dự phòng.
+- Web UI tại `http://rentalroom-bed-led.local` làm phương án dự phòng.
 
 ## 5. Lộ trình mở rộng
 
 | Giai đoạn | Việc làm | Giá trị |
 |---|---|---|
 | **0. Nền** | Cài Home Assistant OS lên laptop cũ / mini PC / Pi; router IoT riêng; cài add-on ESPHome | Có bộ não + mạng ổn định |
-| **1. Ánh sáng** | Node `phongtro-led-giuong` (repo này) | Đèn tự động đầu tiên |
+| **1. Ánh sáng** | Node `rentalroom-bed-led` (repo này) | Đèn tự động đầu tiên |
 | **2. Khí hậu** | Node IR blaster (ESPHome `remote_transmitter` + `climate_ir`) điều khiển điều hoà/quạt; cảm biến nhiệt-ẩm SHT31/AHT20 | Bật điều hoà trước khi về, tự tắt khi ngủ say, tiết kiệm tiền điện |
 | **3. Năng lượng & an toàn** | Ổ cắm đo điện (flash ESPHome/Tasmota hoặc Zigbee); cảm biến cửa Zigbee; cảm biến khói/gas | Biết thiết bị nào ăn điện (tính tiền điện trọ), báo cửa mở khi vắng nhà |
 | **4. Hiện diện & thông báo** | Nhận biết bạn ở nhà qua điện thoại (HA Companion app); thông báo Telegram | Ra khỏi nhà → tắt hết; về nhà → bật đèn, điều hoà |
@@ -123,19 +123,19 @@ esphome/
     presence-ld2410.yaml
     lux-bh1750.yaml
     local-button.yaml
-  phongtro-led-giuong.yaml   # một node = substitutions + danh sách package
+  rentalroom-bed-led.yaml   # một node = substitutions + danh sách package
   secrets.yaml.example
 homeassistant/
   packages/
-    phong_tro_den_tu_dong.yaml
+    rental_room_auto_light.yaml
 docs/
-  de-xuat-he-thong.md
+  system-proposal.md
 ```
 
 ### Bắt đầu
 ```bash
 cd esphome
 cp secrets.yaml.example secrets.yaml      # điền WiFi, tạo key bằng: openssl rand -base64 32
-esphome run phongtro-led-giuong.yaml      # lần đầu cắm USB, sau đó OTA qua WiFi
+esphome run rentalroom-bed-led.yaml      # lần đầu cắm USB, sau đó OTA qua WiFi
 ```
 Sau đó copy `homeassistant/packages/` vào thư mục config của HA và bật `packages` trong `configuration.yaml` (hướng dẫn trong đầu file package).

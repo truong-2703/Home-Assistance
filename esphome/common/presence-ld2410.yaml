@@ -17,13 +17,13 @@ binary_sensor:
   - platform: ld2410
     has_target:
       id: presence
-      name: "Có người"
+      name: "Presence"
     has_moving_target:
-      name: "Chuyển động"
+      name: "Moving Target"
     has_still_target:
-      name: "Người đứng yên"
+      name: "Still Target"
 
 sensor:
   - platform: ld2410
     detection_distance:
-      name: "Khoảng cách phát hiện"
+      name: "Detection Distance"
