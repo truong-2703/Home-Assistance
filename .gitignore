@@ -1,0 +1,11 @@
+# Bí mật — không bao giờ commit
+secrets.yaml
+
+# Build output của ESPHome
+esphome/.esphome/
+.esphome/
+
+# Home Assistant runtime
+homeassistant/.storage/
+homeassistant/*.db
+homeassistant/*.log

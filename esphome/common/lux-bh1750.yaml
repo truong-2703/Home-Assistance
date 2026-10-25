@@ -1,0 +1,12 @@
+# Cảm biến ánh sáng BH1750 (I2C) — để chỉ bật đèn khi phòng thực sự tối.
+# Substitutions cần có: i2c_sda_pin, i2c_scl_pin
+
+i2c:
+  sda: ${i2c_sda_pin}
+  scl: ${i2c_scl_pin}
+
+sensor:
+  - platform: bh1750
+    name: "Độ sáng phòng"
+    id: room_lux
+    update_interval: 10s

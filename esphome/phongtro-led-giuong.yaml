@@ -1,0 +1,30 @@
+# Node đầu tiên: dải LED hắt sáng + cảm biến hiện diện + cảm biến ánh sáng + nút bấm.
+# Thêm thiết bị mới = copy file này, đổi substitutions, bỏ/thêm package cần thiết.
+
+substitutions:
+  device_name: phongtro-led-giuong
+  friendly_name: LED Giuong
+  area: Phong ngu
+
+  # Dải LED — WS2812B 5V, 60 LED/m x 2m. Với WS2813/WS2815 vẫn dùng timing WS2812.
+  led_pin: GPIO10
+  num_leds: "120"
+  led_chipset: WS2812
+  led_rgb_order: GRB
+  led_max_brightness: 60%
+
+  ld2410_tx_pin: GPIO21
+  ld2410_rx_pin: GPIO20
+
+  i2c_sda_pin: GPIO6
+  i2c_scl_pin: GPIO7
+
+  button_pin: GPIO3
+
+packages:
+  base: !include common/base.yaml
+  board: !include common/boards/esp32-c3-supermini.yaml
+  led: !include common/led-strip.yaml
+  presence: !include common/presence-ld2410.yaml
+  lux: !include common/lux-bh1750.yaml
+  button: !include common/local-button.yaml

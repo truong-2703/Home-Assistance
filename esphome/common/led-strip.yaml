@@ -1,0 +1,27 @@
+# Dải LED địa chỉ (WS2812B / WS2813 / WS2815...).
+# Substitutions cần có: led_pin, num_leds, led_chipset, led_rgb_order, led_max_brightness
+# Light id cố định là `main_light` để các package khác (nút bấm...) tham chiếu.
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: main_light
+    name: "Đèn LED"
+    pin: ${led_pin}
+    num_leds: ${num_leds}
+    chipset: ${led_chipset}
+    rgb_order: ${led_rgb_order}
+    # Giới hạn độ sáng tối đa ở firmware -> giảm dòng, nguồn và dây không quá tải
+    color_correct:
+      - ${led_max_brightness}
+      - ${led_max_brightness}
+      - ${led_max_brightness}
+    default_transition_length: 500ms
+    restore_mode: RESTORE_DEFAULT_OFF
+    effects:
+      - addressable_rainbow:
+      - addressable_color_wipe:
+      - addressable_scan:
+      - addressable_twinkle:
+      - addressable_fireworks:
+      - addressable_flicker:
+# Muốn nháy theo nhạc / sync màn hình (LedFx, Hyperion) -> làm một node riêng chạy firmware WLED.

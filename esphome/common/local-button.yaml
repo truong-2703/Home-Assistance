@@ -1,0 +1,32 @@
+# Nút bấm vật lý bật/tắt đèn NGAY TRÊN ESP — chạy cả khi Home Assistant / WiFi chết.
+# Nối nút giữa chân ${button_pin} và GND.
+# Substitutions cần có: button_pin. Yêu cầu light id `main_light`.
+
+binary_sensor:
+  - platform: gpio
+    name: "Nút bấm"
+    pin:
+      number: ${button_pin}
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+    on_click:
+      - min_length: 20ms
+        max_length: 600ms
+        then:
+          - light.toggle: main_light
+    # Giữ lâu -> chuyển sang ánh sáng ấm, dịu (chế độ ngủ)
+    on_press:
+      - delay: 1s
+      - if:
+          condition:
+            binary_sensor.is_on: local_button_held
+          then:
+            - light.turn_on:
+                id: main_light
+                brightness: 20%
+                red: 100%
+                green: 45%
+                blue: 10%
+    id: local_button_held
