@@ -1,0 +1,56 @@
+# Năng lượng: công suất tức thời ước tính theo trạng thái thiết bị (giả lập đồng hồ điện),
+# và số liệu MINH HỌA so sánh tiền điện một tháng có / không có tự động hóa.
+
+template:
+  - sensor:
+      - name: "Căn hộ · Công suất"
+        unique_id: truongha_cong_suat_tong
+        default_entity_id: sensor.can_ho_cong_suat
+        device_class: power
+        state_class: measurement
+        unit_of_measurement: W
+        # Tủ lạnh, router, thiết bị chờ... luôn khoảng 150 W
+        state: >
+          {% set w = namespace(tong=150) %}
+          {% for e, cs in [
+            ('light.phong_khach_den_chinh', 18), ('light.phong_khach_den_trang_tri', 12), ('light.phong_ngu_master_den_tran', 15),
+            ('light.phong_ngu_master_den_ngu', 6), ('light.phong_be_den', 15), ('light.bep_den', 12),
+            ('light.nha_tam_den', 9), ('light.hanh_lang_den', 9),
+            ('switch.bep_o_cam_am_sieu_toc', 1800), ('switch.bep_o_cam_noi_com', 650),
+            ('switch.nha_tam_binh_nong_lanh', 2500), ('media_player.phong_khach_tv', 120),
+            ('switch.phong_khach_may_nen', 1100), ('switch.phong_ngu_master_may_nen', 800),
+            ('switch.phong_be_may_nen', 800) ] %}
+            {% if is_state(e, 'on') %}{% set w.tong = w.tong + cs %}{% endif %}
+          {% endfor %}
+          {# Điều hòa bật nhưng máy nén đang nghỉ: chỉ còn quạt dàn lạnh ~40 W #}
+          {% for p in ['phong_khach', 'phong_ngu_master', 'phong_be'] %}
+            {% if not is_state('climate.' ~ p ~ '_dieu_hoa', 'off')
+                  and is_state('switch.' ~ p ~ '_may_nen', 'off') %}
+              {% set w.tong = w.tong + 40 %}
+            {% endif %}
+          {% endfor %}
+          {{ w.tong }}
+
+      - name: "Căn hộ · Điện năng tháng trước (chưa có TruongHA)"
+        unique_id: truongha_dien_nang_thang_truoc
+        default_entity_id: sensor.can_ho_dien_nang_thang_truoc
+        icon: mdi:flash-outline
+        unit_of_measurement: kWh
+        state: "412"
+
+      - name: "Căn hộ · Điện năng tháng này (có TruongHA)"
+        unique_id: truongha_dien_nang_thang_nay
+        default_entity_id: sensor.can_ho_dien_nang_thang_nay
+        icon: mdi:flash
+        unit_of_measurement: kWh
+        state: "348"
+
+sensor:
+  - platform: integration
+    name: "Căn hộ · Điện năng buổi demo"
+    unique_id: truongha_dien_nang_demo
+    source: sensor.can_ho_cong_suat
+    unit_prefix: k
+    unit_time: h
+    round: 3
+    method: left

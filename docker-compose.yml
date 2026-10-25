@@ -11,7 +11,7 @@ services:
     environment:
       - TZ=Asia/Ho_Chi_Minh
     volumes:
-      - ./config:/config
+      - ./homeassistant:/config
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8123/manifest.json"]
       interval: 10s

@@ -21,7 +21,7 @@ views:
               🏠 **{{ states('input_select.che_do_nha') }}** ·
               {% set an_ninh = {'disarmed': 'Tắt', 'armed_away': 'Đi vắng', 'armed_night': 'Ban đêm',
                  'triggered': '🚨 ĐANG BÁO ĐỘNG', 'armed_home': 'Ở nhà'} %}
-              🛡️ An ninh **{{ an_ninh.get(states('alarm_control_panel.an_ninh_can_ho'), '…') }}** ·
+              🛡️ An ninh **{{ an_ninh.get(states('alarm_control_panel.can_ho_an_ninh'), '…') }}** ·
               📍 Anh Minh cách nhà **{{ states('input_number.khoang_cach_ve_nha') }} km**
           - type: conditional
             grid_options:
@@ -323,6 +323,69 @@ views:
       - type: grid
         cards:
           - type: heading
+            heading: "Phụ lục · Đèn LED phòng trọ (node ESP32)"
+            icon: mdi:led-strip-variant
+          - type: markdown
+            text_only: true
+            content: |
+              - Mở tab **Phòng trọ**. Đây là node ESP32 tự làm, hiện đang giả lập.
+              - **Vào phòng lúc trời tối:** đèn bật ngay, ánh sáng ấm 80% (sau 22:30 giờ thật: 10%, màu cam dịu).
+              - **Trời tối dần khi đang ngồi:** đèn bật sau 1 phút phòng tối (chống bật nhầm khi mây che).
+              - **Rời phòng:** đèn tự tắt sau 3 phút. Cảm biến mmWave biết cả người ngồi yên nên không tắt nhầm.
+              - **Nút trên ESP32:** vẫn bật/tắt được khi Home Assistant hoặc WiFi chết.
+          - type: tile
+            entity: script.demo_phong_tro_vao_phong_toi
+            name: "Có người vào phòng lúc trời tối"
+            color: orange
+            hide_state: true
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_phong_tro_vao_phong_toi
+          - type: tile
+            entity: script.demo_phong_tro_troi_toi_dan
+            name: "Đang ngồi thì trời tối dần"
+            color: amber
+            hide_state: true
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_phong_tro_troi_toi_dan
+          - type: tile
+            entity: script.demo_phong_tro_roi_phong
+            name: "Người rời phòng"
+            color: blue-grey
+            hide_state: true
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_phong_tro_roi_phong
+          - type: tile
+            entity: script.demo_phong_tro_nut_bam
+            name: "Bấm nút trên ESP32"
+            color: teal
+            hide_state: true
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_phong_tro_nut_bam
+          - type: tile
+            entity: script.demo_phong_tro_khoi_phuc
+            name: "Khôi phục phòng trọ"
+            color: red
+            hide_state: true
+            grid_options:
+              columns: full
+            tap_action:
+              action: perform-action
+              perform_action: script.demo_phong_tro_khoi_phuc
+      - type: grid
+        cards:
+          - type: heading
             heading: Điều khiển tay (khi cần)
             icon: mdi:tune
           - type: entities
@@ -330,15 +393,15 @@ views:
               - entity: input_datetime.gio_kich_ban
               - entity: input_select.che_do_nha
               - entity: input_number.khoang_cach_ve_nha
-              - entity: input_number.gia_lap_nhiet_do_ngoai_troi
+              - entity: input_number.gia_lap_ngoai_troi_nhiet_do
                 name: Nhiệt độ ngoài trời
-              - entity: input_boolean.gia_lap_cua_chinh
+              - entity: input_boolean.gia_lap_cua_chinh_cam_bien_cua
                 name: Cửa chính đang mở
-              - entity: input_boolean.gia_lap_chuyen_dong_hanh_lang
+              - entity: input_boolean.gia_lap_hanh_lang_chuyen_dong
                 name: Có chuyển động hành lang
-              - entity: input_boolean.gia_lap_khoi_bep
+              - entity: input_boolean.gia_lap_bep_khoi
                 name: Có khói
-              - entity: input_boolean.gia_lap_gas_bep
+              - entity: input_boolean.gia_lap_bep_gas
                 name: Có gas
               - entity: input_text.dich_vu_thong_bao_dien_thoai
                 name: Gửi thông báo tới điện thoại

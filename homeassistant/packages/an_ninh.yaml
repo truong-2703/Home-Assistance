@@ -3,7 +3,7 @@
 
 alarm_control_panel:
   - platform: manual
-    name: "An ninh căn hộ"
+    name: "Căn hộ · An ninh"
     unique_id: truongha_alarm_an_ninh
     arming_time: 0
     delay_time: 0
@@ -20,9 +20,9 @@ input_boolean:
 # Khi có camera thật, thay bằng entity camera của thiết bị.
 template:
   - image:
-      - name: "Camera cửa chính"
+      - name: "Cửa chính · Camera"
         unique_id: truongha_camera_cua_chinh
-        default_entity_id: image.camera_cua_chinh
+        default_entity_id: image.cua_chinh_camera
         url: >
           http://127.0.0.1:8123/local/camera/{{ 'co_nguoi' if is_state('input_boolean.gia_lap_camera_co_nguoi', 'on') else 'hanh_lang_trong' }}.png
 
@@ -68,10 +68,10 @@ script:
         then:
           - action: alarm_control_panel.alarm_disarm
             target:
-              entity_id: alarm_control_panel.an_ninh_can_ho
+              entity_id: alarm_control_panel.can_ho_an_ninh
           - action: lock.unlock
             target:
-              entity_id: lock.khoa_cua_chinh
+              entity_id: lock.cua_chinh_khoa
           - delay: 1
           - action: script.mo_dong_cua_chinh
           - action: script.truongha_thong_bao
@@ -93,33 +93,33 @@ script:
     sequence:
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh
+          entity_id: input_boolean.gia_lap_cua_chinh_cam_bien_cua
       - delay: 3
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh
+          entity_id: input_boolean.gia_lap_cua_chinh_cam_bien_cua
 
 automation:
   - id: truongha_dot_nhap
     alias: "An ninh: cửa mở khi cả nhà đi vắng"
     triggers:
       - trigger: state
-        entity_id: binary_sensor.cua_chinh
+        entity_id: binary_sensor.cua_chinh_cam_bien_cua
         to: "on"
     conditions:
       - condition: state
-        entity_id: alarm_control_panel.an_ninh_can_ho
+        entity_id: alarm_control_panel.can_ho_an_ninh
         state: armed_away
     actions:
       - action: alarm_control_panel.alarm_trigger
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: input_boolean.turn_on
         target:
           entity_id: input_boolean.gia_lap_camera_co_nguoi
       - action: switch.turn_on
         target:
-          entity_id: switch.coi_bao_dong
+          entity_id: switch.can_ho_coi_bao_dong
       - action: script.truongha_thong_bao
         data:
           tieu_de: "CẢNH BÁO: cửa chính bị mở!"
@@ -132,34 +132,34 @@ automation:
             - action: light.toggle
               target:
                 entity_id:
-                  - light.den_phong_khach
-                  - light.den_hanh_lang
+                  - light.phong_khach_den_chinh
+                  - light.hanh_lang_den
             - delay:
                 milliseconds: 700
       - action: light.turn_on
         target:
           entity_id:
-            - light.den_phong_khach
-            - light.den_hanh_lang
+            - light.phong_khach_den_chinh
+            - light.hanh_lang_den
 
   - id: truongha_tat_bao_dong
     alias: "An ninh: tắt còi khi chủ nhà tắt báo động"
     triggers:
       - trigger: state
-        entity_id: alarm_control_panel.an_ninh_can_ho
+        entity_id: alarm_control_panel.can_ho_an_ninh
         from: triggered
     actions:
       - if:
           - condition: state
-            entity_id: binary_sensor.khoi_bep
+            entity_id: binary_sensor.bep_khoi
             state: "off"
           - condition: state
-            entity_id: binary_sensor.gas_bep
+            entity_id: binary_sensor.bep_gas
             state: "off"
         then:
           - action: switch.turn_off
             target:
-              entity_id: switch.coi_bao_dong
+              entity_id: switch.can_ho_coi_bao_dong
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.gia_lap_camera_co_nguoi
@@ -168,19 +168,19 @@ automation:
     alias: "An toàn: phát hiện khói trong bếp"
     triggers:
       - trigger: state
-        entity_id: binary_sensor.khoi_bep
+        entity_id: binary_sensor.bep_khoi
         to: "on"
     actions:
       - action: switch.turn_on
         target:
-          entity_id: switch.coi_bao_dong
+          entity_id: switch.can_ho_coi_bao_dong
       # Bật đèn toàn nhà để dễ thoát hiểm, mở khóa cửa, tắt điều hòa để khói không lan
       - action: light.turn_on
         target:
           entity_id: all
       - action: lock.unlock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - action: climate.set_hvac_mode
         target:
           entity_id: all
@@ -196,16 +196,16 @@ automation:
     alias: "An toàn: phát hiện rò rỉ gas"
     triggers:
       - trigger: state
-        entity_id: binary_sensor.gas_bep
+        entity_id: binary_sensor.bep_gas
         to: "on"
     actions:
       # Cố ý KHÔNG bật/tắt đèn hay thiết bị điện: công tắc có thể tạo tia lửa khi có gas.
       - action: switch.turn_on
         target:
-          entity_id: switch.coi_bao_dong
+          entity_id: switch.can_ho_coi_bao_dong
       - action: lock.unlock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - action: script.truongha_thong_bao
         data:
           tieu_de: "KHẨN CẤP: phát hiện rò rỉ gas!"
@@ -217,25 +217,25 @@ automation:
     triggers:
       - trigger: state
         entity_id:
-          - binary_sensor.khoi_bep
-          - binary_sensor.gas_bep
+          - binary_sensor.bep_khoi
+          - binary_sensor.bep_gas
         to: "off"
     conditions:
       - condition: state
-        entity_id: binary_sensor.khoi_bep
+        entity_id: binary_sensor.bep_khoi
         state: "off"
       - condition: state
-        entity_id: binary_sensor.gas_bep
+        entity_id: binary_sensor.bep_gas
         state: "off"
       - condition: not
         conditions:
           - condition: state
-            entity_id: alarm_control_panel.an_ninh_can_ho
+            entity_id: alarm_control_panel.can_ho_an_ninh
             state: triggered
     actions:
       - action: switch.turn_off
         target:
-          entity_id: switch.coi_bao_dong
+          entity_id: switch.can_ho_coi_bao_dong
       - action: script.truongha_thong_bao
         data:
           tieu_de: "Đã hết sự cố"

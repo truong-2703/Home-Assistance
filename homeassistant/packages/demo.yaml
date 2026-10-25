@@ -39,29 +39,29 @@ script:
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_den_phong_khach
-            - input_boolean.gia_lap_den_trang_tri
-            - input_boolean.gia_lap_den_master
-            - input_boolean.gia_lap_den_ngu_master
-            - input_boolean.gia_lap_den_phong_be
-            - input_boolean.gia_lap_den_bep
-            - input_boolean.gia_lap_den_nha_tam
-            - input_boolean.gia_lap_den_hanh_lang
-            - input_boolean.gia_lap_o_cam_am_sieu_toc
-            - input_boolean.gia_lap_o_cam_noi_com
-            - input_boolean.gia_lap_binh_nong_lanh
-            - input_boolean.gia_lap_coi_bao_dong
-            - input_boolean.gia_lap_rem_phong_khach
-            - input_boolean.gia_lap_rem_master
-            - input_boolean.gia_lap_cua_chinh
-            - input_boolean.gia_lap_chuyen_dong_hanh_lang
-            - input_boolean.gia_lap_khoi_bep
-            - input_boolean.gia_lap_gas_bep
-            - input_boolean.gia_lap_tv_phong_khach
+            - input_boolean.gia_lap_phong_khach_den_chinh
+            - input_boolean.gia_lap_phong_khach_den_trang_tri
+            - input_boolean.gia_lap_phong_ngu_master_den_tran
+            - input_boolean.gia_lap_phong_ngu_master_den_ngu
+            - input_boolean.gia_lap_phong_be_den
+            - input_boolean.gia_lap_bep_den
+            - input_boolean.gia_lap_nha_tam_den
+            - input_boolean.gia_lap_hanh_lang_den
+            - input_boolean.gia_lap_bep_o_cam_am_sieu_toc
+            - input_boolean.gia_lap_bep_o_cam_noi_com
+            - input_boolean.gia_lap_nha_tam_binh_nong_lanh
+            - input_boolean.gia_lap_can_ho_coi_bao_dong
+            - input_boolean.gia_lap_phong_khach_rem
+            - input_boolean.gia_lap_phong_ngu_master_rem
+            - input_boolean.gia_lap_cua_chinh_cam_bien_cua
+            - input_boolean.gia_lap_hanh_lang_chuyen_dong
+            - input_boolean.gia_lap_bep_khoi
+            - input_boolean.gia_lap_bep_gas
+            - input_boolean.gia_lap_phong_khach_tv
             - input_boolean.co_thong_bao
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_khoa_cua_chinh
+          entity_id: input_boolean.gia_lap_cua_chinh_khoa
       - action: input_number.set_value
         target:
           entity_id: input_number.khoang_cach_ve_nha
@@ -69,38 +69,38 @@ script:
           value: 0
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_nhiet_do_phong_khach
+          entity_id: input_number.gia_lap_phong_khach_nhiet_do
         data:
           value: 29
       - action: input_number.set_value
         target:
           entity_id:
-            - input_number.gia_lap_nhiet_do_master
-            - input_number.gia_lap_nhiet_do_phong_be
+            - input_number.gia_lap_phong_ngu_master_nhiet_do
+            - input_number.gia_lap_phong_be_nhiet_do
         data:
           value: 26.2
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_nhiet_do_ngoai_troi
+          entity_id: input_number.gia_lap_ngoai_troi_nhiet_do
         data:
           value: 27
       - action: climate.set_hvac_mode
         target:
-          entity_id: climate.dieu_hoa_phong_khach
+          entity_id: climate.phong_khach_dieu_hoa
         data:
           hvac_mode: "off"
       - action: climate.set_hvac_mode
         target:
           entity_id:
-            - climate.dieu_hoa_phong_master
-            - climate.dieu_hoa_phong_be
+            - climate.phong_ngu_master_dieu_hoa
+            - climate.phong_be_dieu_hoa
         data:
           hvac_mode: cool
       - action: climate.set_preset_mode
         target:
           entity_id:
-            - climate.dieu_hoa_phong_master
-            - climate.dieu_hoa_phong_be
+            - climate.phong_ngu_master_dieu_hoa
+            - climate.phong_be_dieu_hoa
         data:
           preset_mode: sleep
       - action: input_boolean.turn_off
@@ -108,10 +108,10 @@ script:
           entity_id: input_boolean.gia_lap_camera_co_nguoi
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: alarm_control_panel.alarm_arm_night
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: persistent_notification.dismiss_all
       - action: automation.turn_on
         target:
@@ -119,6 +119,7 @@ script:
             - automation.di_vang_tat_het_khoa_cua_bat_an_ninh
             - automation.an_toan_het_khoi_va_gas_thi_tat_coi
             - automation.an_ninh_tat_coi_khi_chu_nha_tat_bao_dong
+      - action: script.demo_phong_tro_khoi_phuc
 
   demo_canh_1_buoi_sang:
     alias: "Cảnh 1 · 6:00 → 6:30 Buổi sáng"
@@ -135,10 +136,10 @@ script:
       # Chị Hà xuống bếp đun nước pha sữa cho bé
       - action: light.turn_on
         target:
-          entity_id: light.den_bep
+          entity_id: light.bep_den
       - action: switch.turn_on
         target:
-          entity_id: switch.o_cam_am_sieu_toc
+          entity_id: switch.bep_o_cam_am_sieu_toc
 
   demo_canh_2_di_vang:
     alias: "Cảnh 2 · 7:30 Cả nhà ra khỏi nhà"
@@ -173,10 +174,10 @@ script:
       - action: script.mo_dong_cua_chinh
       - action: lock.lock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - action: alarm_control_panel.alarm_arm_away
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: script.truongha_thong_bao
         data:
           tieu_de: "{{ states('input_text.ten_nguoi_giup_viec') }} đã ra về"
@@ -201,16 +202,16 @@ script:
           gio: "14:00"
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_nhiet_do_ngoai_troi
+          entity_id: input_number.gia_lap_ngoai_troi_nhiet_do
         data:
           value: 34
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh
+          entity_id: input_boolean.gia_lap_cua_chinh_cam_bien_cua
       - delay: 4
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_cua_chinh
+          entity_id: input_boolean.gia_lap_cua_chinh_cam_bien_cua
 
   demo_canh_4_khoi:
     alias: "Cảnh 4 · Có khói trong bếp"
@@ -221,7 +222,7 @@ script:
           gio: "15:30"
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_khoi_bep
+          entity_id: input_boolean.gia_lap_bep_khoi
 
   demo_canh_4_gas:
     alias: "Cảnh 4 · Rò rỉ gas"
@@ -232,7 +233,7 @@ script:
           gio: "16:00"
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_gas_bep
+          entity_id: input_boolean.gia_lap_bep_gas
 
   demo_canh_4_het_su_co:
     alias: "Cảnh 4 · Hết khói / gas"
@@ -241,8 +242,8 @@ script:
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_khoi_bep
-            - input_boolean.gia_lap_gas_bep
+            - input_boolean.gia_lap_bep_khoi
+            - input_boolean.gia_lap_bep_gas
 
   demo_canh_5_sap_ve:
     alias: "Cảnh 5 · 18:00 Anh Minh còn 2 km"
@@ -252,11 +253,11 @@ script:
       - action: input_boolean.turn_off
         target:
           entity_id:
-            - input_boolean.gia_lap_khoi_bep
-            - input_boolean.gia_lap_gas_bep
+            - input_boolean.gia_lap_bep_khoi
+            - input_boolean.gia_lap_bep_gas
       - action: switch.turn_off
         target:
-          entity_id: switch.coi_bao_dong
+          entity_id: switch.can_ho_coi_bao_dong
       - action: light.turn_off
         target:
           entity_id: all
@@ -267,13 +268,13 @@ script:
           hvac_mode: "off"
       - action: lock.lock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: alarm_control_panel.alarm_arm_away
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: input_boolean.turn_off
         target:
           entity_id: input_boolean.gia_lap_camera_co_nguoi
@@ -287,12 +288,12 @@ script:
           gio: "18:00"
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_nhiet_do_ngoai_troi
+          entity_id: input_number.gia_lap_ngoai_troi_nhiet_do
         data:
           value: 31
       - action: input_number.set_value
         target:
-          entity_id: input_number.gia_lap_nhiet_do_phong_khach
+          entity_id: input_number.gia_lap_phong_khach_nhiet_do
         data:
           value: 32
       - action: input_number.set_value
@@ -321,7 +322,7 @@ script:
           value: 0
       - action: lock.unlock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - delay: 2
       - action: script.mo_dong_cua_chinh
 
@@ -352,8 +353,8 @@ script:
           gio: "02:00"
       - action: input_boolean.turn_on
         target:
-          entity_id: input_boolean.gia_lap_chuyen_dong_hanh_lang
+          entity_id: input_boolean.gia_lap_hanh_lang_chuyen_dong
       - delay: 4
       - action: input_boolean.turn_off
         target:
-          entity_id: input_boolean.gia_lap_chuyen_dong_hanh_lang
+          entity_id: input_boolean.gia_lap_hanh_lang_chuyen_dong

@@ -21,9 +21,9 @@ views:
 
               🕒 **{{ states('input_datetime.gio_kich_ban')[:5] }}**  ·
               🏠 Chế độ: **{{ states('input_select.che_do_nha') }}**  ·
-              🛡️ An ninh: **{{ an_ninh.get(states('alarm_control_panel.an_ninh_can_ho'), '…') }}**  ·
-              🌡️ Ngoài trời **{{ states('sensor.nhiet_do_ngoai_troi') }}°C**  ·
-              ⚡ **{{ states('sensor.cong_suat_tieu_thu') }} W**
+              🛡️ An ninh: **{{ an_ninh.get(states('alarm_control_panel.can_ho_an_ninh'), '…') }}**  ·
+              🌡️ Ngoài trời **{{ states('sensor.ngoai_troi_nhiet_do') }}°C**  ·
+              ⚡ **{{ states('sensor.can_ho_cong_suat') }} W**
           - type: conditional
             grid_options:
               columns: full
@@ -45,10 +45,10 @@ views:
               - condition: or
                 conditions:
                   - condition: state
-                    entity: switch.o_cam_am_sieu_toc
+                    entity: switch.bep_o_cam_am_sieu_toc
                     state: "on"
                   - condition: state
-                    entity: switch.o_cam_noi_com
+                    entity: switch.bep_o_cam_noi_com
                     state: "on"
               - condition: state
                 entity: input_select.che_do_nha
@@ -69,7 +69,7 @@ views:
               columns: full
             conditions:
               - condition: state
-                entity: lock.khoa_cua_chinh
+                entity: lock.cua_chinh_khoa
                 state: unlocked
               - condition: state
                 entity: input_select.che_do_nha
@@ -89,11 +89,11 @@ views:
               columns: 6
             conditions:
               - condition: state
-                entity: alarm_control_panel.an_ninh_can_ho
+                entity: alarm_control_panel.can_ho_an_ninh
                 state: triggered
             card:
               type: picture-entity
-              entity: image.camera_cua_chinh
+              entity: image.cua_chinh_camera
               name: Ảnh chụp lúc cửa bị mở
               show_state: false
           - type: tile
@@ -142,7 +142,7 @@ views:
             image: /local/floorplan/can_ho.svg
             elements:
               - type: image
-                entity: light.den_phong_khach
+                entity: light.phong_khach_den_chinh
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -157,7 +157,7 @@ views:
                   width: 48%
                   height: 48.3%
               - type: image
-                entity: light.den_trang_tri
+                entity: light.phong_khach_den_trang_tri
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -172,7 +172,7 @@ views:
                   width: 26%
                   height: 20%
               - type: image
-                entity: light.den_bep
+                entity: light.bep_den
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -187,7 +187,7 @@ views:
                   width: 26%
                   height: 38.3%
               - type: image
-                entity: light.den_hanh_lang
+                entity: light.hanh_lang_den
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -202,7 +202,7 @@ views:
                   width: 22%
                   height: 38.3%
               - type: image
-                entity: light.den_master
+                entity: light.phong_ngu_master_den_tran
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -217,7 +217,7 @@ views:
                   width: 44%
                   height: 43.3%
               - type: image
-                entity: light.den_ngu_master
+                entity: light.phong_ngu_master_den_ngu
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -232,7 +232,7 @@ views:
                   width: 12%
                   height: 16%
               - type: image
-                entity: light.den_nha_tam
+                entity: light.nha_tam_den
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -247,7 +247,7 @@ views:
                   width: 18%
                   height: 43.3%
               - type: image
-                entity: light.den_phong_be
+                entity: light.phong_be_den
                 image: /local/floorplan/trong_suot.svg
                 state_image:
                   "on": /local/floorplan/den_sang.svg
@@ -262,7 +262,7 @@ views:
                   width: 26%
                   height: 43.3%
               - type: state-icon
-                entity: light.den_phong_khach
+                entity: light.phong_khach_den_chinh
                 tap_action:
                   action: toggle
                 hold_action:
@@ -275,7 +275,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_trang_tri
+                entity: light.phong_khach_den_trang_tri
                 tap_action:
                   action: toggle
                 hold_action:
@@ -288,7 +288,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_bep
+                entity: light.bep_den
                 tap_action:
                   action: toggle
                 hold_action:
@@ -301,7 +301,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_hanh_lang
+                entity: light.hanh_lang_den
                 tap_action:
                   action: toggle
                 hold_action:
@@ -314,7 +314,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_master
+                entity: light.phong_ngu_master_den_tran
                 tap_action:
                   action: toggle
                 hold_action:
@@ -327,7 +327,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_ngu_master
+                entity: light.phong_ngu_master_den_ngu
                 tap_action:
                   action: toggle
                 hold_action:
@@ -340,7 +340,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_nha_tam
+                entity: light.nha_tam_den
                 tap_action:
                   action: toggle
                 hold_action:
@@ -353,7 +353,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: light.den_phong_be
+                entity: light.phong_be_den
                 tap_action:
                   action: toggle
                 hold_action:
@@ -366,7 +366,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: media_player.tv_phong_khach
+                entity: media_player.phong_khach_tv
                 tap_action:
                   action: toggle
                 hold_action:
@@ -379,7 +379,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: cover.rem_phong_khach
+                entity: cover.phong_khach_rem
                 tap_action:
                   action: toggle
                 hold_action:
@@ -392,7 +392,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: cover.rem_master
+                entity: cover.phong_ngu_master_rem
                 tap_action:
                   action: toggle
                 hold_action:
@@ -405,7 +405,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: climate.dieu_hoa_phong_khach
+                entity: climate.phong_khach_dieu_hoa
                 tap_action:
                   action: more-info
                 hold_action:
@@ -418,7 +418,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: climate.dieu_hoa_phong_master
+                entity: climate.phong_ngu_master_dieu_hoa
                 tap_action:
                   action: more-info
                 hold_action:
@@ -431,7 +431,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: climate.dieu_hoa_phong_be
+                entity: climate.phong_be_dieu_hoa
                 tap_action:
                   action: more-info
                 hold_action:
@@ -444,7 +444,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: switch.o_cam_am_sieu_toc
+                entity: switch.bep_o_cam_am_sieu_toc
                 tap_action:
                   action: toggle
                 hold_action:
@@ -457,7 +457,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: switch.o_cam_noi_com
+                entity: switch.bep_o_cam_noi_com
                 tap_action:
                   action: toggle
                 hold_action:
@@ -470,7 +470,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: switch.binh_nong_lanh
+                entity: switch.nha_tam_binh_nong_lanh
                 tap_action:
                   action: toggle
                 hold_action:
@@ -483,7 +483,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: binary_sensor.khoi_bep
+                entity: binary_sensor.bep_khoi
                 tap_action:
                   action: more-info
                 hold_action:
@@ -496,7 +496,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: binary_sensor.gas_bep
+                entity: binary_sensor.bep_gas
                 tap_action:
                   action: more-info
                 hold_action:
@@ -509,7 +509,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: binary_sensor.chuyen_dong_hanh_lang
+                entity: binary_sensor.hanh_lang_chuyen_dong
                 tap_action:
                   action: more-info
                 hold_action:
@@ -522,7 +522,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: switch.coi_bao_dong
+                entity: switch.can_ho_coi_bao_dong
                 tap_action:
                   action: more-info
                 hold_action:
@@ -535,7 +535,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: image.camera_cua_chinh
+                entity: image.cua_chinh_camera
                 tap_action:
                   action: more-info
                 hold_action:
@@ -548,7 +548,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: lock.khoa_cua_chinh
+                entity: lock.cua_chinh_khoa
                 tap_action:
                   action: toggle
                 hold_action:
@@ -561,7 +561,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-icon
-                entity: binary_sensor.cua_chinh
+                entity: binary_sensor.cua_chinh_cam_bien_cua
                 tap_action:
                   action: more-info
                 hold_action:
@@ -574,7 +574,7 @@ views:
                   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
                   --mdc-icon-size: 18px
               - type: state-label
-                entity: sensor.nhiet_do_phong_khach
+                entity: sensor.phong_khach_nhiet_do
                 style:
                   left: 20%
                   top: 27%
@@ -585,7 +585,7 @@ views:
                   padding: 0 6px
                   border-radius: 8px
               - type: state-label
-                entity: sensor.nhiet_do_master
+                entity: sensor.phong_ngu_master_nhiet_do
                 style:
                   left: 80%
                   top: 41%
@@ -596,7 +596,7 @@ views:
                   padding: 0 6px
                   border-radius: 8px
               - type: state-label
-                entity: sensor.nhiet_do_phong_be
+                entity: sensor.phong_be_nhiet_do
                 style:
                   left: 83%
                   top: 85%
@@ -619,21 +619,21 @@ views:
             heading: Phòng khách
             icon: mdi:sofa
           - type: tile
-            entity: light.den_phong_khach
+            entity: light.phong_khach_den_chinh
             name: Đèn chính
           - type: tile
-            entity: light.den_trang_tri
+            entity: light.phong_khach_den_trang_tri
             name: Đèn trang trí
           - type: tile
-            entity: media_player.tv_phong_khach
+            entity: media_player.phong_khach_tv
             name: TV
           - type: tile
-            entity: cover.rem_phong_khach
+            entity: cover.phong_khach_rem
             name: Rèm
             features:
               - type: cover-open-close
           - type: tile
-            entity: climate.dieu_hoa_phong_khach
+            entity: climate.phong_khach_dieu_hoa
             name: Điều hòa
             grid_options:
               columns: full
@@ -642,10 +642,10 @@ views:
                 hvac_modes: ["off", cool]
               - type: target-temperature
           - type: tile
-            entity: sensor.nhiet_do_phong_khach
+            entity: sensor.phong_khach_nhiet_do
             name: Nhiệt độ
           - type: tile
-            entity: sensor.do_am_phong_khach
+            entity: sensor.phong_khach_do_am
             name: Độ ẩm
       - type: grid
         cards:
@@ -653,21 +653,21 @@ views:
             heading: Phòng ngủ master
             icon: mdi:bed-king
           - type: tile
-            entity: light.den_master
+            entity: light.phong_ngu_master_den_tran
             name: Đèn trần
           - type: tile
-            entity: light.den_ngu_master
+            entity: light.phong_ngu_master_den_ngu
             name: Đèn ngủ
           - type: tile
-            entity: cover.rem_master
+            entity: cover.phong_ngu_master_rem
             name: Rèm
             features:
               - type: cover-open-close
           - type: tile
-            entity: sensor.nhiet_do_master
+            entity: sensor.phong_ngu_master_nhiet_do
             name: Nhiệt độ
           - type: tile
-            entity: climate.dieu_hoa_phong_master
+            entity: climate.phong_ngu_master_dieu_hoa
             name: Điều hòa
             grid_options:
               columns: full
@@ -679,13 +679,13 @@ views:
             heading: Phòng bé
             icon: mdi:teddy-bear
           - type: tile
-            entity: light.den_phong_be
+            entity: light.phong_be_den
             name: Đèn
           - type: tile
-            entity: sensor.nhiet_do_phong_be
+            entity: sensor.phong_be_nhiet_do
             name: Nhiệt độ
           - type: tile
-            entity: climate.dieu_hoa_phong_be
+            entity: climate.phong_be_dieu_hoa
             name: Điều hòa
             grid_options:
               columns: full
@@ -699,34 +699,34 @@ views:
             heading: Bếp
             icon: mdi:stove
           - type: tile
-            entity: light.den_bep
+            entity: light.bep_den
             name: Đèn bếp
           - type: tile
-            entity: switch.o_cam_am_sieu_toc
+            entity: switch.bep_o_cam_am_sieu_toc
             name: Ấm siêu tốc
           - type: tile
-            entity: switch.o_cam_noi_com
+            entity: switch.bep_o_cam_noi_com
             name: Nồi cơm
           - type: tile
-            entity: binary_sensor.khoi_bep
+            entity: binary_sensor.bep_khoi
             name: Khói
           - type: tile
-            entity: binary_sensor.gas_bep
+            entity: binary_sensor.bep_gas
             name: Gas
           - type: heading
             heading: Hành lang & nhà tắm
             icon: mdi:door
           - type: tile
-            entity: light.den_hanh_lang
+            entity: light.hanh_lang_den
             name: Đèn hành lang
           - type: tile
-            entity: binary_sensor.chuyen_dong_hanh_lang
+            entity: binary_sensor.hanh_lang_chuyen_dong
             name: Chuyển động
           - type: tile
-            entity: light.den_nha_tam
+            entity: light.nha_tam_den
             name: Đèn nhà tắm
           - type: tile
-            entity: switch.binh_nong_lanh
+            entity: switch.nha_tam_binh_nong_lanh
             name: Bình nóng lạnh
 
   - title: An ninh
@@ -741,13 +741,13 @@ views:
             heading: Báo động
             icon: mdi:shield-home
           - type: alarm-panel
-            entity: alarm_control_panel.an_ninh_can_ho
+            entity: alarm_control_panel.can_ho_an_ninh
             name: An ninh căn hộ
             states:
               - arm_away
               - arm_night
           - type: tile
-            entity: switch.coi_bao_dong
+            entity: switch.can_ho_coi_bao_dong
             name: Còi báo động
       - type: grid
         cards:
@@ -755,16 +755,16 @@ views:
             heading: Cửa chính
             icon: mdi:door-closed-lock
           - type: picture-entity
-            entity: image.camera_cua_chinh
+            entity: image.cua_chinh_camera
             name: Camera cửa chính
             show_state: false
           - type: tile
-            entity: lock.khoa_cua_chinh
+            entity: lock.cua_chinh_khoa
             name: Khóa cửa
             features:
               - type: lock-commands
           - type: tile
-            entity: binary_sensor.cua_chinh
+            entity: binary_sensor.cua_chinh_cam_bien_cua
             name: Cảm biến cửa
       - type: grid
         cards:
@@ -790,10 +790,10 @@ views:
             heading: Cảnh báo khói & gas
             icon: mdi:fire-alert
           - type: tile
-            entity: binary_sensor.khoi_bep
+            entity: binary_sensor.bep_khoi
             name: Khói trong bếp
           - type: tile
-            entity: binary_sensor.gas_bep
+            entity: binary_sensor.bep_gas
             name: Gas trong bếp
 
   - title: Năng lượng
@@ -808,7 +808,7 @@ views:
             heading: Đang tiêu thụ
             icon: mdi:flash
           - type: gauge
-            entity: sensor.cong_suat_tieu_thu
+            entity: sensor.can_ho_cong_suat
             name: Công suất cả nhà
             min: 0
             max: 6000
@@ -818,13 +818,13 @@ views:
               yellow: 1500
               red: 3500
           - type: entity
-            entity: sensor.dien_nang_trong_buoi_demo
+            entity: sensor.can_ho_dien_nang_buoi_demo
             name: Điện năng từ đầu buổi demo
           - type: history-graph
             title: Công suất trong 1 giờ qua
             hours_to_show: 1
             entities:
-              - entity: sensor.cong_suat_tieu_thu
+              - entity: sensor.can_ho_cong_suat
                 name: Công suất
       - type: grid
         column_span: 2
@@ -847,8 +847,8 @@ views:
                 {{- ns.tong -}}
               {%- endmacro -%}
               {%- macro vnd(x) -%}{{ '{:,.0f}'.format(x | float).replace(',', '.') }} đ{%- endmacro -%}
-              {%- set truoc = states('sensor.dien_nang_thang_truoc') | int -%}
-              {%- set nay = states('sensor.dien_nang_thang_nay') | int -%}
+              {%- set truoc = states('sensor.can_ho_dien_nang_thang_truoc') | int -%}
+              {%- set nay = states('sensor.can_ho_dien_nang_thang_nay') | int -%}
               {%- set t1 = tien(truoc) | float -%}
               {%- set t2 = tien(nay) | float -%}
               | | Điện năng | Tiền điện (chưa VAT) |
@@ -864,3 +864,45 @@ views:
               - Giảm bớt điện ở các bậc giá cao nhất của biểu giá bậc thang
 
               <ha-alert alert-type="info">Số liệu minh họa cho một căn hộ 2 phòng ngủ. Mức tiết kiệm thực tế tùy thói quen sử dụng của mỗi gia đình.</ha-alert>
+
+  - title: Phòng trọ
+    path: phong-tro
+    icon: mdi:led-strip-variant
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Đèn LED hắt sáng tự động
+            icon: mdi:led-strip-variant
+          - type: markdown
+            text_only: true
+            content: >
+              Node **ESP32 + ESPHome** tự làm: dải LED, cảm biến hiện diện mmWave (biết cả người
+              ngồi yên), cảm biến ánh sáng và nút bấm vật lý. Đèn tự bật khi có người và phòng tối,
+              tự tắt sau 3 phút không còn ai.
+          - type: tile
+            entity: light.led_giuong_den_led
+            name: Đèn LED
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: binary_sensor.led_giuong_co_nguoi
+            name: Có người
+          - type: tile
+            entity: sensor.led_giuong_do_sang_phong
+            name: Độ sáng phòng
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cài đặt
+            icon: mdi:tune
+          - type: entities
+            entities:
+              - entity: input_boolean.den_tu_dong
+                name: Đèn tự động
+              - entity: input_number.nguong_lux_bat_den
+                name: Bật đèn khi phòng tối hơn

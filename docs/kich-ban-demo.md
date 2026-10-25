@@ -42,6 +42,18 @@
 | 7 | Mở tab Năng lượng | Công suất cả nhà theo thời gian thực, bảng so sánh tiền điện theo biểu giá bậc thang EVN | **Số liệu minh họa**: nói rõ với khách |
 | – | (khách tự bấm) | Khách tự điều khiển trên điện thoại/tablet | Giới thiệu gói Cơ bản và Nâng cao |
 
+## Phụ lục: đèn LED phòng trọ (node ESP32 tự làm)
+
+Dùng khi khách quan tâm đến thiết bị tự làm, giá rẻ. Mở tab **Phòng trọ**, dùng các nút ở mục "Phụ lục" trên dashboard Điều khiển demo.
+Node đang giả lập. Khi có ESP32 thật (`esphome/phongtro-led-giuong.yaml`) thì đặt node lên bàn để demo trực tiếp.
+
+| Nút bấm | Kết quả | Điểm nhấn |
+|---|---|---|
+| Có người vào phòng lúc trời tối | Đèn LED bật ngay, ánh sáng ấm 80% (sau 22:30 giờ thật: 10%, màu cam dịu) | Cảm biến mmWave và cảm biến ánh sáng |
+| Đang ngồi thì trời tối dần | Đèn bật sau 1 phút phòng tối | Không bật nhầm khi mây che thoáng qua |
+| Người rời phòng | Đèn tắt sau 3 phút | mmWave biết cả người ngồi yên nên không tắt nhầm |
+| Bấm nút trên ESP32 | Bật/tắt đèn | Vẫn chạy khi Home Assistant hoặc WiFi chết |
+
 ## Gói đề xuất
 
 - **Cơ bản:** đèn, điều hòa, khóa cửa, cảm biến cửa.

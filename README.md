@@ -63,29 +63,45 @@ Thông báo đẩy cần laptop có internet.
 ### Cấu trúc thư mục
 
 ```
-docker-compose.yml          Home Assistant + bước tạo tài khoản tự động
+docker-compose.yml          Home Assistant (mount thư mục homeassistant/) + bước tạo tài khoản tự động
 setup/onboard.py            Tạo tài khoản, bỏ qua màn hình cài đặt ban đầu
-config/
-  configuration.yaml        Cấu hình chính (múi giờ VN, tiếng Việt, VND)
+esphome/                    Firmware node ESP32 thật (phòng trọ: LED, mmWave, lux, nút bấm)
+homeassistant/              Thư mục cấu hình Home Assistant DUY NHẤT của repo
+  configuration.yaml        Cấu hình chính (múi giờ VN, tiếng Việt, VND, nạp mọi package)
   packages/
-    thiet_bi.yaml           Thiết bị giả lập: đèn, ổ cắm, khóa, rèm, cảm biến, điều hòa, TV
+    phong_tro_den_tu_dong.yaml  Automation đèn LED phòng trọ (dùng cho node ESP32 thật)
+    gia_lap_phong_tro.yaml      Giả lập node ESP32 phòng trọ - XÓA khi có phần cứng thật
+    thiet_bi.yaml           Thiết bị giả lập của căn hộ: đèn, ổ cắm, khóa, rèm, cảm biến, điều hòa, TV
     an_ninh.yaml            Báo động, camera, mã tạm người giúp việc, khói và gas
     kich_ban.yaml           Chế độ nhà, thông báo, automation sáng/đi vắng/về nhà/ban đêm
     nang_luong.yaml         Công suất tiêu thụ, số liệu tiền điện minh họa
     demo.yaml               Nút bấm chuyển cảnh cho người thuyết trình
   dashboards/
-    truongha.yaml           Dashboard khách hàng
+    truongha.yaml           Dashboard khách hàng (có tab Phòng trọ)
     dieu_khien_demo.yaml    Dashboard người thuyết trình
   themes/truongha.yaml      Màu thương hiệu TruongHA
   www/                      Sơ đồ căn hộ, ảnh camera giả lập
 docs/kich-ban-demo.md       Kịch bản demo đã chốt
 ```
 
+### Quy ước đặt tên
+
+Theo nguyên tắc trong `docs/de-xuat-he-thong.md` (khu vực trước, chức năng sau):
+
+- **Node ESPHome:** `<khu-vuc>-<chuc-nang>`, ví dụ `phongtro-led-giuong`.
+- **Entity Home Assistant** (không dùng được dấu gạch ngang): `<khu_vuc>_<chuc_nang>`, tên hiển thị `Khu vực · Chức năng`.
+  Ví dụ `light.bep_den` (Bếp · Đèn), `climate.phong_khach_dieu_hoa`, `lock.cua_chinh_khoa`, `switch.can_ho_coi_bao_dong`.
+- Entity do node ESPHome tạo ra lấy theo `friendly_name` của node, ví dụ `light.led_giuong_den_led`.
+
 ### Cách giả lập hoạt động
 
-- Mỗi thiết bị (ví dụ `light.den_bep`) là một thiết bị template, lưu trạng thái trong helper ẩn `input_boolean.gia_lap_*`.
+- Mỗi thiết bị (ví dụ `light.bep_den`) là một thiết bị template, lưu trạng thái trong helper ẩn `input_boolean.gia_lap_*`.
   Automation và dashboard chỉ dùng entity thiết bị, không dùng helper, nên khi có phần cứng thật
   chỉ cần thay thiết bị ảo bằng thiết bị thật **cùng entity_id**.
+- **Phòng trọ:** `gia_lap_phong_tro.yaml` giả lập node `esphome/phongtro-led-giuong.yaml` với đúng entity id node thật
+  sẽ tạo, nên automation thật `phong_tro_den_tu_dong.yaml` chạy được ngay trong demo. Khi flash ESP32 thật:
+  xóa file giả lập, khởi động lại Home Assistant, xóa 3 thực thể giả lập cũ trong **Cài đặt → Thực thể**,
+  rồi thêm node ESPHome. Automation giữ nguyên.
 - **Giờ trong kịch bản** (`input_datetime.gio_kich_ban`) thay cho giờ thật, để tua tới 6:30, 14:00, 22:30... mà không phải chờ.
   Khi lắp nhà thật, đổi trigger sang giờ thật (`trigger: time`).
 - Điều hòa dùng `generic_thermostat`: nhiệt độ phòng giảm khi máy nén chạy và tăng dần về nhiệt độ ngoài trời khi tắt.

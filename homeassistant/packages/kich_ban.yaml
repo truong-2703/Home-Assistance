@@ -57,9 +57,9 @@ input_text:
 
 template:
   - binary_sensor:
-      - name: "Trời tối"
+      - name: "Ngoài trời · Trời tối"
         unique_id: truongha_troi_toi
-        default_entity_id: binary_sensor.troi_toi
+        default_entity_id: binary_sensor.ngoai_troi_troi_toi
         icon: mdi:weather-night
         state: >
           {% set h = states('input_datetime.gio_kich_ban')[:2] | int(12) %}
@@ -153,7 +153,7 @@ script:
     sequence:
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: input_select.select_option
         target:
           entity_id: input_select.che_do_nha
@@ -166,16 +166,16 @@ script:
     sequence:
       - action: light.turn_off
         target:
-          entity_id: light.den_phong_khach
+          entity_id: light.phong_khach_den_chinh
       - action: light.turn_on
         target:
-          entity_id: light.den_trang_tri
+          entity_id: light.phong_khach_den_trang_tri
       - action: cover.close_cover
         target:
-          entity_id: cover.rem_phong_khach
+          entity_id: cover.phong_khach_rem
       - action: media_player.turn_on
         target:
-          entity_id: media_player.tv_phong_khach
+          entity_id: media_player.phong_khach_tv
 
   che_do_di_ngu:
     alias: "Đi ngủ"
@@ -191,35 +191,35 @@ script:
           entity_id: all
       - action: media_player.turn_off
         target:
-          entity_id: media_player.tv_phong_khach
+          entity_id: media_player.phong_khach_tv
       - action: cover.close_cover
         target:
           entity_id: all
       - action: climate.set_hvac_mode
         target:
-          entity_id: climate.dieu_hoa_phong_khach
+          entity_id: climate.phong_khach_dieu_hoa
         data:
           hvac_mode: "off"
       - action: climate.set_hvac_mode
         target:
           entity_id:
-            - climate.dieu_hoa_phong_master
-            - climate.dieu_hoa_phong_be
+            - climate.phong_ngu_master_dieu_hoa
+            - climate.phong_be_dieu_hoa
         data:
           hvac_mode: cool
       - action: climate.set_preset_mode
         target:
           entity_id:
-            - climate.dieu_hoa_phong_master
-            - climate.dieu_hoa_phong_be
+            - climate.phong_ngu_master_dieu_hoa
+            - climate.phong_be_dieu_hoa
         data:
           preset_mode: sleep
       - action: alarm_control_panel.alarm_arm_night
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - if:
           - condition: state
-            entity_id: lock.khoa_cua_chinh
+            entity_id: lock.cua_chinh_khoa
             state: unlocked
         then:
           - action: script.truongha_thong_bao
@@ -244,8 +244,8 @@ script:
       - action: switch.turn_off
         target:
           entity_id:
-            - switch.o_cam_am_sieu_toc
-            - switch.o_cam_noi_com
+            - switch.bep_o_cam_am_sieu_toc
+            - switch.bep_o_cam_noi_com
       - action: script.truongha_thong_bao
         data:
           tieu_de: "Đã tắt ổ cắm bếp"
@@ -258,7 +258,7 @@ script:
     sequence:
       - action: lock.lock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - action: script.truongha_thong_bao
         data:
           tieu_de: "Đã khóa cửa chính"
@@ -275,7 +275,7 @@ automation:
     actions:
       - action: switch.turn_on
         target:
-          entity_id: switch.binh_nong_lanh
+          entity_id: switch.nha_tam_binh_nong_lanh
 
   - id: truongha_chao_buoi_sang
     alias: "Buổi sáng: chào buổi sáng lúc 6:30"
@@ -285,7 +285,7 @@ automation:
     actions:
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: input_select.select_option
         target:
           entity_id: input_select.che_do_nha
@@ -293,21 +293,21 @@ automation:
           option: "Ở nhà"
       - action: light.turn_on
         target:
-          entity_id: light.den_master
+          entity_id: light.phong_ngu_master_den_tran
       - action: cover.open_cover
         target:
           entity_id: all
       - action: climate.set_hvac_mode
         target:
           entity_id:
-            - climate.dieu_hoa_phong_master
-            - climate.dieu_hoa_phong_be
+            - climate.phong_ngu_master_dieu_hoa
+            - climate.phong_be_dieu_hoa
         data:
           hvac_mode: "off"
       - action: script.truongha_thong_bao
         data:
           tieu_de: "Chào buổi sáng nhà anh Minh!"
-          noi_dung: "Ngoài trời {{ states('sensor.nhiet_do_ngoai_troi') }}°C. Đã mở rèm, tắt điều hòa phòng ngủ. Bình nóng lạnh đã bật từ 6:00, nước nóng sẵn sàng."
+          noi_dung: "Ngoài trời {{ states('sensor.ngoai_troi_nhiet_do') }}°C. Đã mở rèm, tắt điều hòa phòng ngủ. Bình nóng lạnh đã bật từ 6:00, nước nóng sẵn sàng."
           muc_do: info
 
   # ---------- Cảnh 2: đi vắng ----------
@@ -328,23 +328,23 @@ automation:
           hvac_mode: "off"
       - action: media_player.turn_off
         target:
-          entity_id: media_player.tv_phong_khach
+          entity_id: media_player.phong_khach_tv
       - action: cover.close_cover
         target:
           entity_id: all
       - action: switch.turn_off
         target:
-          entity_id: switch.binh_nong_lanh
+          entity_id: switch.nha_tam_binh_nong_lanh
       - action: lock.lock
         target:
-          entity_id: lock.khoa_cua_chinh
+          entity_id: lock.cua_chinh_khoa
       - action: alarm_control_panel.alarm_arm_away
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       # Ổ cắm bếp không tự tắt (có thể đang nấu cơm hẹn giờ): hỏi chủ nhà.
       - variables:
           dang_bat: >
-            {{ ['switch.o_cam_am_sieu_toc', 'switch.o_cam_noi_com']
+            {{ ['switch.bep_o_cam_am_sieu_toc', 'switch.bep_o_cam_noi_com']
                | select('is_state', 'on') | map('state_attr', 'friendly_name')
                | map('replace', 'Ổ cắm ', '') | list }}
       - if:
@@ -409,25 +409,25 @@ automation:
     actions:
       - action: climate.set_hvac_mode
         target:
-          entity_id: climate.dieu_hoa_phong_khach
+          entity_id: climate.phong_khach_dieu_hoa
         data:
           hvac_mode: cool
       - action: climate.set_temperature
         target:
-          entity_id: climate.dieu_hoa_phong_khach
+          entity_id: climate.phong_khach_dieu_hoa
         data:
           temperature: 25
       - action: script.truongha_thong_bao
         data:
           tieu_de: "Anh Minh sắp về tới nhà"
-          noi_dung: "Còn khoảng {{ states('input_number.khoang_cach_ve_nha') | float | round(1) }} km. Đã bật trước điều hòa phòng khách 25°C (trong nhà đang {{ states('sensor.nhiet_do_phong_khach') }}°C)."
+          noi_dung: "Còn khoảng {{ states('input_number.khoang_cach_ve_nha') | float | round(1) }} km. Đã bật trước điều hòa phòng khách 25°C (trong nhà đang {{ states('sensor.phong_khach_nhiet_do') }}°C)."
           muc_do: info
 
   - id: truongha_ve_nha
     alias: "Về nhà: mở khóa cửa thì tắt an ninh, trời tối thì bật đèn"
     triggers:
       - trigger: state
-        entity_id: lock.khoa_cua_chinh
+        entity_id: lock.cua_chinh_khoa
         to: unlocked
     conditions:
       - condition: state
@@ -440,7 +440,7 @@ automation:
     actions:
       - action: alarm_control_panel.alarm_disarm
         target:
-          entity_id: alarm_control_panel.an_ninh_can_ho
+          entity_id: alarm_control_panel.can_ho_an_ninh
       - action: input_select.select_option
         target:
           entity_id: input_select.che_do_nha
@@ -448,18 +448,18 @@ automation:
           option: "Ở nhà"
       - if:
           - condition: state
-            entity_id: binary_sensor.troi_toi
+            entity_id: binary_sensor.ngoai_troi_troi_toi
             state: "on"
         then:
           - action: light.turn_on
             target:
               entity_id:
-                - light.den_hanh_lang
-                - light.den_phong_khach
+                - light.hanh_lang_den
+                - light.phong_khach_den_chinh
       - action: script.truongha_thong_bao
         data:
           tieu_de: "Chào mừng về nhà!"
-          noi_dung: "An ninh đã tắt{{ ', đèn hành lang và phòng khách đã bật' if is_state('binary_sensor.troi_toi', 'on') else '' }}. Phòng khách đang {{ states('sensor.nhiet_do_phong_khach') }}°C."
+          noi_dung: "An ninh đã tắt{{ ', đèn hành lang và phòng khách đã bật' if is_state('binary_sensor.ngoai_troi_troi_toi', 'on') else '' }}. Phòng khách đang {{ states('sensor.phong_khach_nhiet_do') }}°C."
           muc_do: success
 
   # ---------- Cảnh 6: ban đêm ----------
@@ -468,7 +468,7 @@ automation:
     mode: restart
     triggers:
       - trigger: state
-        entity_id: binary_sensor.chuyen_dong_hanh_lang
+        entity_id: binary_sensor.hanh_lang_chuyen_dong
         to: "on"
     conditions:
       - condition: state
@@ -478,19 +478,19 @@ automation:
       - action: light.turn_on
         target:
           entity_id:
-            - light.den_hanh_lang
-            - light.den_nha_tam
+            - light.hanh_lang_den
+            - light.nha_tam_den
       - wait_for_trigger:
           - trigger: state
-            entity_id: binary_sensor.chuyen_dong_hanh_lang
+            entity_id: binary_sensor.hanh_lang_chuyen_dong
             to: "off"
             # Nhà thật nên để 2 phút; để 20 giây cho demo nhanh
             for: "00:00:20"
       - action: light.turn_off
         target:
           entity_id:
-            - light.den_hanh_lang
-            - light.den_nha_tam
+            - light.hanh_lang_den
+            - light.nha_tam_den
 
   # ---------- Mô phỏng nhiệt độ phòng ----------
   - id: truongha_mo_phong_nhiet_do
@@ -503,14 +503,14 @@ automation:
       - repeat:
           for_each:
             - phong_khach
-            - master
+            - phong_ngu_master
             - phong_be
           sequence:
             - variables:
-                hien_tai: "{{ states('input_number.gia_lap_nhiet_do_' ~ repeat.item) | float(28) }}"
-                ngoai_troi: "{{ states('input_number.gia_lap_nhiet_do_ngoai_troi') | float(30) }}"
+                hien_tai: "{{ states('input_number.gia_lap_' ~ repeat.item ~ '_nhiet_do') | float(28) }}"
+                ngoai_troi: "{{ states('input_number.gia_lap_ngoai_troi_nhiet_do') | float(30) }}"
                 moi: >
-                  {% if is_state('switch.may_nen_' ~ repeat.item, 'on') %}
+                  {% if is_state('switch.' ~ repeat.item ~ '_may_nen', 'on') %}
                     {{ [hien_tai - 0.3, 16] | max }}
                   {% elif hien_tai < ngoai_troi - 1 %}
                     {{ hien_tai + 0.1 }}
@@ -519,7 +519,7 @@ automation:
                   {% endif %}
             - action: input_number.set_value
               target:
-                entity_id: "input_number.gia_lap_nhiet_do_{{ repeat.item }}"
+                entity_id: "input_number.gia_lap_{{ repeat.item }}_nhiet_do"
               data:
                 value: "{{ moi | float | round(1) }}"
 
