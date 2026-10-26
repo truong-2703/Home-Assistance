@@ -4,7 +4,7 @@
 
 binary_sensor:
   - platform: gpio
-    name: "Nút bấm"
+    name: "Button"
     pin:
       number: ${button_pin}
       mode: INPUT_PULLUP

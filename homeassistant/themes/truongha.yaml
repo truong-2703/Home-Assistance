@@ -1,0 +1,22 @@
+TruongHA:
+  modes:
+    light:
+      primary-color: "#0E7C66"
+      accent-color: "#E8A100"
+      app-header-background-color: "#0E7C66"
+      app-header-text-color: "#FFFFFF"
+      primary-background-color: "#F3F6F5"
+      card-background-color: "#FFFFFF"
+      state-light-on-color: "#E8A100"
+      state-switch-on-color: "#0E7C66"
+      ha-card-border-radius: "14px"
+    dark:
+      primary-color: "#2BB596"
+      accent-color: "#F5B83D"
+      app-header-background-color: "#0B2E27"
+      app-header-text-color: "#FFFFFF"
+      primary-background-color: "#0F1513"
+      card-background-color: "#18211E"
+      state-light-on-color: "#F5B83D"
+      state-switch-on-color: "#2BB596"
+      ha-card-border-radius: "14px"

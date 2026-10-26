@@ -1,0 +1,908 @@
+# Dashboard khách hàng: TruongHA · Căn hộ nhà anh Minh
+title: TruongHA
+views:
+  - title: Tổng quan
+    path: overview
+    icon: mdi:home-heart
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 3
+        cards:
+          - type: markdown
+            grid_options:
+              columns: full
+            text_only: true
+            content: >
+              {% set alarm_labels = {'disarmed': 'Tắt', 'armed_away': 'Đi vắng', 'armed_night': 'Ban đêm',
+                 'triggered': '🚨 ĐANG BÁO ĐỘNG', 'armed_home': 'Ở nhà'} %}
+              # <ha-icon icon="mdi:home-heart"></ha-icon> TruongHA · Căn hộ nhà anh Minh
+
+              🕒 **{{ states('input_datetime.scenario_time')[:5] }}**  ·
+              🏠 Chế độ: **{{ states('input_select.home_mode') }}**  ·
+              🛡️ An ninh: **{{ alarm_labels.get(states('alarm_control_panel.apartment_security'), '…') }}**  ·
+              🌡️ Ngoài trời **{{ states('sensor.outdoor_temperature') }}°C**  ·
+              ⚡ **{{ states('sensor.apartment_power') }} W**
+          - type: conditional
+            grid_options:
+              columns: full
+            conditions:
+              - condition: state
+                entity: input_boolean.notification_visible
+                state: "on"
+            card:
+              type: markdown
+              text_only: true
+              content: >
+                {% set m = states('input_text.notification_level') %}
+                {% set alert_type = {'critical': 'error', 'warning': 'warning', 'success': 'success'}.get(m, 'info') %}
+                <ha-alert alert-type="{{ alert_type }}" title="{{ states('input_text.notification_title') }}">{{ states('input_text.notification_message') }}</ha-alert>
+          - type: conditional
+            grid_options:
+              columns: full
+            conditions:
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: switch.kitchen_kettle_plug
+                    state: "on"
+                  - condition: state
+                    entity: switch.kitchen_rice_cooker_plug
+                    state: "on"
+              - condition: state
+                entity: input_select.home_mode
+                state: "Đi vắng"
+            card:
+              type: tile
+              entity: script.turn_off_kitchen_plugs
+              hide_state: true
+              name: "Ổ cắm bếp vẫn bật · bấm để tắt ngay"
+              icon: mdi:power-plug-off
+              color: amber
+              vertical: false
+              tap_action:
+                action: perform-action
+                perform_action: script.turn_off_kitchen_plugs
+          - type: conditional
+            grid_options:
+              columns: full
+            conditions:
+              - condition: state
+                entity: lock.front_door_lock
+                state: unlocked
+              - condition: state
+                entity: input_select.home_mode
+                state: "Ban đêm"
+            card:
+              type: tile
+              entity: script.lock_front_door_remotely
+              hide_state: true
+              name: "Cửa chính chưa khóa · bấm để khóa"
+              icon: mdi:lock-alert
+              color: red
+              tap_action:
+                action: perform-action
+                perform_action: script.lock_front_door_remotely
+          - type: conditional
+            grid_options:
+              columns: 6
+            conditions:
+              - condition: state
+                entity: alarm_control_panel.apartment_security
+                state: triggered
+            card:
+              type: picture-entity
+              entity: image.front_door_camera
+              name: Ảnh chụp lúc cửa bị mở
+              show_state: false
+          - type: tile
+            entity: script.mode_home
+            hide_state: true
+            name: Ở nhà
+            color: green
+            grid_options:
+              columns: 3
+            tap_action:
+              action: perform-action
+              perform_action: script.mode_home
+          - type: tile
+            entity: script.mode_away
+            hide_state: true
+            name: Đi vắng
+            color: blue
+            grid_options:
+              columns: 3
+            tap_action:
+              action: perform-action
+              perform_action: script.mode_away
+          - type: tile
+            entity: script.mode_movie
+            hide_state: true
+            name: Xem phim
+            color: purple
+            grid_options:
+              columns: 3
+            tap_action:
+              action: perform-action
+              perform_action: script.mode_movie
+          - type: tile
+            entity: script.mode_sleep
+            hide_state: true
+            name: Đi ngủ
+            color: indigo
+            grid_options:
+              columns: 3
+            tap_action:
+              action: perform-action
+              perform_action: script.mode_sleep
+          - type: picture-elements
+            grid_options:
+              columns: full
+            image: /local/floorplan/apartment.svg
+            elements:
+              - type: image
+                entity: light.living_room_main_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 28%
+                  top: 30.8%
+                  width: 48%
+                  height: 48.3%
+              - type: image
+                entity: light.living_room_accent_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 19.5%
+                  top: 44%
+                  width: 26%
+                  height: 20%
+              - type: image
+                entity: light.kitchen_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 17%
+                  top: 74.2%
+                  width: 26%
+                  height: 38.3%
+              - type: image
+                entity: light.hallway_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 41%
+                  top: 74.2%
+                  width: 22%
+                  height: 38.3%
+              - type: image
+                entity: light.master_bedroom_ceiling_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 74%
+                  top: 28.3%
+                  width: 44%
+                  height: 43.3%
+              - type: image
+                entity: light.master_bedroom_night_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 92.5%
+                  top: 21.7%
+                  width: 12%
+                  height: 16%
+              - type: image
+                entity: light.bathroom_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 61%
+                  top: 71.7%
+                  width: 18%
+                  height: 43.3%
+              - type: image
+                entity: light.kids_room_light
+                image: /local/floorplan/transparent.svg
+                state_image:
+                  "on": /local/floorplan/light_glow.svg
+                  "off": /local/floorplan/transparent.svg
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 83%
+                  top: 71.7%
+                  width: 26%
+                  height: 43.3%
+              - type: state-icon
+                entity: light.living_room_main_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 30%
+                  top: 20%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.living_room_accent_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 11%
+                  top: 44%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.kitchen_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 22%
+                  top: 74%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.hallway_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 41%
+                  top: 66%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.master_bedroom_ceiling_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 66%
+                  top: 30%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.master_bedroom_night_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 92.5%
+                  top: 30%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.bathroom_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 61%
+                  top: 68%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: light.kids_room_light
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 78%
+                  top: 66%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: media_player.living_room_tv
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 20.5%
+                  top: 14%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: cover.living_room_curtain
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 41.5%
+                  top: 11%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: cover.master_bedroom_curtain
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 62%
+                  top: 11%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: climate.living_room_ac
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 8%
+                  top: 14%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: climate.master_bedroom_ac
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 92.5%
+                  top: 12%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: climate.kids_room_ac
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 92.5%
+                  top: 58%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: switch.kitchen_kettle_plug
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 24.5%
+                  top: 63%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: switch.kitchen_rice_cooker_plug
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 16%
+                  top: 63%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: switch.bathroom_water_heater
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 57%
+                  top: 59%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: binary_sensor.kitchen_smoke
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 8%
+                  top: 70%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: binary_sensor.kitchen_gas
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 8%
+                  top: 82%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: binary_sensor.hallway_motion
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 48%
+                  top: 66%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: switch.apartment_siren
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 34%
+                  top: 66%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: image.front_door_camera
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 34%
+                  top: 86%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: lock.front_door_lock
+                tap_action:
+                  action: toggle
+                hold_action:
+                  action: more-info
+                style:
+                  left: 41.5%
+                  top: 86%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-icon
+                entity: binary_sensor.front_door_contact
+                tap_action:
+                  action: more-info
+                hold_action:
+                  action: more-info
+                style:
+                  left: 48.5%
+                  top: 86%
+                  background: rgba(255, 255, 255, 0.88)
+                  border-radius: 50%
+                  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25)
+                  --mdc-icon-size: 18px
+              - type: state-label
+                entity: sensor.living_room_temperature
+                style:
+                  left: 20%
+                  top: 27%
+                  color: "#0E7C66"
+                  font-size: 15px
+                  font-weight: 600
+                  background: rgba(255, 255, 255, 0.85)
+                  padding: 0 6px
+                  border-radius: 8px
+              - type: state-label
+                entity: sensor.master_bedroom_temperature
+                style:
+                  left: 80%
+                  top: 41%
+                  color: "#0E7C66"
+                  font-size: 15px
+                  font-weight: 600
+                  background: rgba(255, 255, 255, 0.85)
+                  padding: 0 6px
+                  border-radius: 8px
+              - type: state-label
+                entity: sensor.kids_room_temperature
+                style:
+                  left: 83%
+                  top: 85%
+                  color: "#0E7C66"
+                  font-size: 15px
+                  font-weight: 600
+                  background: rgba(255, 255, 255, 0.85)
+                  padding: 0 6px
+                  border-radius: 8px
+
+  - title: Phòng
+    path: rooms
+    icon: mdi:floor-plan
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Phòng khách
+            icon: mdi:sofa
+          - type: tile
+            entity: light.living_room_main_light
+            name: Đèn chính
+          - type: tile
+            entity: light.living_room_accent_light
+            name: Đèn trang trí
+          - type: tile
+            entity: media_player.living_room_tv
+            name: TV
+          - type: tile
+            entity: cover.living_room_curtain
+            name: Rèm
+            features:
+              - type: cover-open-close
+          - type: tile
+            entity: climate.living_room_ac
+            name: Điều hòa
+            grid_options:
+              columns: full
+            features:
+              - type: climate-hvac-modes
+                hvac_modes: ["off", cool]
+              - type: target-temperature
+          - type: tile
+            entity: sensor.living_room_temperature
+            name: Nhiệt độ
+          - type: tile
+            entity: sensor.living_room_humidity
+            name: Độ ẩm
+      - type: grid
+        cards:
+          - type: heading
+            heading: Phòng ngủ master
+            icon: mdi:bed-king
+          - type: tile
+            entity: light.master_bedroom_ceiling_light
+            name: Đèn trần
+          - type: tile
+            entity: light.master_bedroom_night_light
+            name: Đèn ngủ
+          - type: tile
+            entity: cover.master_bedroom_curtain
+            name: Rèm
+            features:
+              - type: cover-open-close
+          - type: tile
+            entity: sensor.master_bedroom_temperature
+            name: Nhiệt độ
+          - type: tile
+            entity: climate.master_bedroom_ac
+            name: Điều hòa
+            grid_options:
+              columns: full
+            features:
+              - type: climate-hvac-modes
+                hvac_modes: ["off", cool]
+              - type: target-temperature
+          - type: heading
+            heading: Phòng bé
+            icon: mdi:teddy-bear
+          - type: tile
+            entity: light.kids_room_light
+            name: Đèn
+          - type: tile
+            entity: sensor.kids_room_temperature
+            name: Nhiệt độ
+          - type: tile
+            entity: climate.kids_room_ac
+            name: Điều hòa
+            grid_options:
+              columns: full
+            features:
+              - type: climate-hvac-modes
+                hvac_modes: ["off", cool]
+              - type: target-temperature
+      - type: grid
+        cards:
+          - type: heading
+            heading: Bếp
+            icon: mdi:stove
+          - type: tile
+            entity: light.kitchen_light
+            name: Đèn bếp
+          - type: tile
+            entity: switch.kitchen_kettle_plug
+            name: Ấm siêu tốc
+          - type: tile
+            entity: switch.kitchen_rice_cooker_plug
+            name: Nồi cơm
+          - type: tile
+            entity: binary_sensor.kitchen_smoke
+            name: Khói
+          - type: tile
+            entity: binary_sensor.kitchen_gas
+            name: Gas
+          - type: heading
+            heading: Hành lang & nhà tắm
+            icon: mdi:door
+          - type: tile
+            entity: light.hallway_light
+            name: Đèn hành lang
+          - type: tile
+            entity: binary_sensor.hallway_motion
+            name: Chuyển động
+          - type: tile
+            entity: light.bathroom_light
+            name: Đèn nhà tắm
+          - type: tile
+            entity: switch.bathroom_water_heater
+            name: Bình nóng lạnh
+
+  - title: An ninh
+    path: security
+    icon: mdi:shield-home
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Báo động
+            icon: mdi:shield-home
+          - type: alarm-panel
+            entity: alarm_control_panel.apartment_security
+            name: An ninh căn hộ
+            states:
+              - arm_away
+              - arm_night
+          - type: tile
+            entity: switch.apartment_siren
+            name: Còi báo động
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cửa chính
+            icon: mdi:door-closed-lock
+          - type: picture-entity
+            entity: image.front_door_camera
+            name: Camera cửa chính
+            show_state: false
+          - type: tile
+            entity: lock.front_door_lock
+            name: Khóa cửa
+            features:
+              - type: lock-commands
+          - type: tile
+            entity: binary_sensor.front_door_contact
+            name: Cảm biến cửa
+      - type: grid
+        cards:
+          - type: heading
+            heading: Mã mở cửa tạm
+            icon: mdi:account-key
+          - type: markdown
+            text_only: true
+            content: >
+              Cấp mã riêng cho người giúp việc, chỉ mở được cửa trong khung giờ cho phép.
+              Mỗi lần mở cửa, chủ nhà nhận thông báo ngay.
+          - type: entities
+            entities:
+              - entity: input_text.housekeeper_name
+                name: Người được cấp mã
+              - entity: input_text.housekeeper_temp_code
+                name: Mã
+              - entity: input_datetime.temp_code_valid_from
+                name: Hiệu lực từ
+              - entity: input_datetime.temp_code_valid_to
+                name: Đến
+          - type: heading
+            heading: Cảnh báo khói & gas
+            icon: mdi:fire-alert
+          - type: tile
+            entity: binary_sensor.kitchen_smoke
+            name: Khói trong bếp
+          - type: tile
+            entity: binary_sensor.kitchen_gas
+            name: Gas trong bếp
+
+  - title: Năng lượng
+    path: energy
+    icon: mdi:lightning-bolt
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Đang tiêu thụ
+            icon: mdi:flash
+          - type: gauge
+            entity: sensor.apartment_power
+            name: Công suất cả nhà
+            min: 0
+            max: 6000
+            needle: true
+            severity:
+              green: 0
+              yellow: 1500
+              red: 3500
+          - type: entity
+            entity: sensor.apartment_energy_demo
+            name: Điện năng từ đầu buổi demo
+          - type: history-graph
+            title: Công suất trong 1 giờ qua
+            hours_to_show: 1
+            entities:
+              - entity: sensor.apartment_power
+                name: Công suất
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Tiền điện một tháng (minh họa)
+            icon: mdi:cash
+          - type: markdown
+            content: |
+              {#- Biểu giá điện sinh hoạt bậc thang EVN (đồng/kWh, chưa VAT), áp dụng từ 10/05/2025.
+                  Kiểm tra lại biểu giá hiện hành trước khi demo. -#}
+              {%- set tiers = [[50, 1984], [50, 2050], [100, 2380], [100, 2998], [100, 3350], [100000, 3460]] -%}
+              {%- macro cost(kwh) -%}
+                {%- set ns = namespace(remaining=kwh, total=0) -%}
+                {%- for b in tiers -%}
+                  {%- set used = [ns.remaining, b[0]] | min -%}
+                  {%- set ns.total = ns.total + used * b[1] -%}
+                  {%- set ns.remaining = ns.remaining - used -%}
+                {%- endfor -%}
+                {{- ns.total -}}
+              {%- endmacro -%}
+              {%- macro vnd(x) -%}{{ '{:,.0f}'.format(x | float).replace(',', '.') }} đ{%- endmacro -%}
+              {%- set last_month = states('sensor.apartment_energy_last_month') | int -%}
+              {%- set this_month = states('sensor.apartment_energy_this_month') | int -%}
+              {%- set cost_last = cost(last_month) | float -%}
+              {%- set cost_this = cost(this_month) | float -%}
+              | | Điện năng | Tiền điện (chưa VAT) |
+              |---|---:|---:|
+              | Chưa có TruongHA | {{ last_month }} kWh | {{ vnd(cost_last) }} |
+              | **Có TruongHA** | **{{ this_month }} kWh** | **{{ vnd(cost_this) }}** |
+              | **Tiết kiệm** | **{{ last_month - this_month }} kWh ({{ ((last_month - this_month) / last_month * 100) | round(0) | int }}%)** | **{{ vnd(cost_last - cost_this) }} / tháng** |
+
+              Tiết kiệm đến từ đâu:
+              - Tự tắt điều hòa, đèn, bình nóng lạnh khi cả nhà đi vắng
+              - Điều hòa phòng ngủ chạy chế độ ngủ 26°C thay vì để 22–23°C cả đêm
+              - Bình nóng lạnh chỉ bật theo lịch (6:00 sáng) thay vì cắm cả ngày
+              - Giảm bớt điện ở các bậc giá cao nhất của biểu giá bậc thang
+
+              <ha-alert alert-type="info">Số liệu minh họa cho một căn hộ 2 phòng ngủ. Mức tiết kiệm thực tế tùy thói quen sử dụng của mỗi gia đình.</ha-alert>
+
+  - title: Phòng trọ
+    path: rental-room
+    icon: mdi:led-strip-variant
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Đèn LED hắt sáng tự động
+            icon: mdi:led-strip-variant
+          - type: markdown
+            text_only: true
+            content: >
+              Node **ESP32 + ESPHome** tự làm: dải LED, cảm biến hiện diện mmWave (biết cả người
+              ngồi yên), cảm biến ánh sáng và nút bấm vật lý. Đèn tự bật khi có người và phòng tối,
+              tự tắt sau 3 phút không còn ai.
+          - type: tile
+            entity: light.rental_room_bed_led_strip
+            name: Đèn LED
+            grid_options:
+              columns: full
+            features:
+              - type: light-brightness
+          - type: tile
+            entity: binary_sensor.rental_room_bed_presence
+            name: Có người
+          - type: tile
+            entity: sensor.rental_room_bed_illuminance
+            name: Độ sáng phòng
+      - type: grid
+        cards:
+          - type: heading
+            heading: Cài đặt
+            icon: mdi:tune
+          - type: entities
+            entities:
+              - entity: input_boolean.rental_room_auto_light
+                name: Đèn tự động
+              - entity: input_number.rental_room_lux_threshold
+                name: Bật đèn khi phòng tối hơn

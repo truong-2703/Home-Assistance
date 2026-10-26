@@ -5,7 +5,7 @@
 light:
   - platform: esp32_rmt_led_strip
     id: main_light
-    name: "Đèn LED"
+    name: "LED Strip"
     pin: ${led_pin}
     num_leds: ${num_leds}
     chipset: ${led_chipset}

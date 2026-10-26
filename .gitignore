@@ -5,7 +5,20 @@ secrets.yaml
 esphome/.esphome/
 .esphome/
 
-# Home Assistant runtime
+# Home Assistant runtime (thư mục homeassistant/ được mount làm /config)
 homeassistant/.storage/
+homeassistant/.cloud/
+homeassistant/deps/
+homeassistant/tts/
+homeassistant/backups/
+homeassistant/blueprints/
 homeassistant/*.db
-homeassistant/*.log
+homeassistant/*.db-shm
+homeassistant/*.db-wal
+homeassistant/*.log*
+homeassistant/.HA_VERSION
+homeassistant/.ha_run.lock
+homeassistant/automations.yaml
+homeassistant/scripts.yaml
+homeassistant/scenes.yaml
+__pycache__/

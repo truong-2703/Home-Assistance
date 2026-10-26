@@ -1,0 +1,36 @@
+# TruongHA - Demo nhà thông minh (Home Assistant + thiết bị giả lập)
+# Chạy:   docker compose up -d
+# Mở:     http://localhost:8123   (tài khoản mặc định: truongha / truongha123)
+services:
+  homeassistant:
+    container_name: truongha-homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - ./homeassistant:/config
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8123/manifest.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # Chạy một lần: tự tạo tài khoản và bỏ qua màn hình cài đặt ban đầu.
+  setup:
+    container_name: truongha-setup
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: "no"
+    depends_on:
+      homeassistant:
+        condition: service_healthy
+    entrypoint: ["python3", "/setup/onboard.py"]
+    environment:
+      - HA_URL=http://homeassistant:8123
+      - HA_NAME=${HA_NAME:-TruongHA Demo}
+      - HA_USERNAME=${HA_USERNAME:-truongha}
+      - HA_PASSWORD=${HA_PASSWORD:-truongha123}
+    volumes:
+      - ./setup:/setup:ro

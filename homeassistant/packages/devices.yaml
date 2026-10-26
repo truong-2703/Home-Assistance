@@ -1,0 +1,469 @@
+# Thiết bị giả lập của căn hộ.
+# Mỗi thiết bị "thật" (đèn, ổ cắm, khóa, rèm, cảm biến...) được lưu trạng thái trong một
+# helper ẩn tên sim_* . Khi có phần cứng thật, chỉ cần thay thiết bị ảo bằng thiết bị thật
+# có cùng entity_id là các automation và dashboard vẫn chạy nguyên vẹn.
+
+# Điều hòa và TV lấy entity id từ "name" (tiếng Anh); tên hiển thị tiếng Việt đặt ở đây.
+homeassistant:
+  customize:
+    climate.living_room_ac:
+      friendly_name: "Phòng khách · Điều hòa"
+    climate.master_bedroom_ac:
+      friendly_name: "Phòng ngủ master · Điều hòa"
+    climate.kids_room_ac:
+      friendly_name: "Phòng bé · Điều hòa"
+    media_player.living_room_tv:
+      friendly_name: "Phòng khách · TV"
+
+input_boolean:
+  sim_living_room_main_light:
+    name: "[Giả lập] Phòng khách · Đèn chính"
+  sim_living_room_accent_light:
+    name: "[Giả lập] Phòng khách · Đèn trang trí"
+  sim_master_bedroom_ceiling_light:
+    name: "[Giả lập] Phòng ngủ master · Đèn trần"
+  sim_master_bedroom_night_light:
+    name: "[Giả lập] Phòng ngủ master · Đèn ngủ"
+  sim_kids_room_light:
+    name: "[Giả lập] Phòng bé · Đèn"
+  sim_kitchen_light:
+    name: "[Giả lập] Bếp · Đèn"
+  sim_bathroom_light:
+    name: "[Giả lập] Nhà tắm · Đèn"
+  sim_hallway_light:
+    name: "[Giả lập] Hành lang · Đèn"
+  sim_kitchen_kettle_plug:
+    name: "[Giả lập] Bếp · Ổ cắm ấm siêu tốc"
+  sim_kitchen_rice_cooker_plug:
+    name: "[Giả lập] Bếp · Ổ cắm nồi cơm"
+  sim_bathroom_water_heater:
+    name: "[Giả lập] Nhà tắm · Bình nóng lạnh"
+  sim_apartment_siren:
+    name: "[Giả lập] Căn hộ · Còi báo động"
+  sim_living_room_ac_compressor:
+    name: "[Giả lập] Phòng khách · Máy nén điều hòa"
+  sim_master_bedroom_ac_compressor:
+    name: "[Giả lập] Phòng ngủ master · Máy nén điều hòa"
+  sim_kids_room_ac_compressor:
+    name: "[Giả lập] Phòng bé · Máy nén điều hòa"
+  sim_front_door_lock:
+    name: "[Giả lập] Khóa cửa chính (bật = đã khóa)"
+    initial: true
+  sim_living_room_curtain:
+    name: "[Giả lập] Phòng khách · Rèm (bật = đang mở)"
+  sim_master_bedroom_curtain:
+    name: "[Giả lập] Phòng ngủ master · Rèm (bật = đang mở)"
+  sim_front_door_contact:
+    name: "[Giả lập] Cửa chính · Cảm biến cửa"
+    initial: false
+  sim_hallway_motion:
+    name: "[Giả lập] Hành lang · Chuyển động"
+    initial: false
+  sim_kitchen_smoke:
+    name: "[Giả lập] Bếp · Khói"
+    initial: false
+  sim_kitchen_gas:
+    name: "[Giả lập] Bếp · Gas"
+    initial: false
+  sim_living_room_tv:
+    name: "[Giả lập] TV phòng khách"
+
+input_number:
+  sim_living_room_temperature:
+    name: "[Giả lập] Phòng khách · Nhiệt độ"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 29
+    unit_of_measurement: "°C"
+    mode: box
+  sim_master_bedroom_temperature:
+    name: "[Giả lập] Phòng ngủ master · Nhiệt độ"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 26.5
+    unit_of_measurement: "°C"
+    mode: box
+  sim_kids_room_temperature:
+    name: "[Giả lập] Phòng bé · Nhiệt độ"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 26.5
+    unit_of_measurement: "°C"
+    mode: box
+  sim_outdoor_temperature:
+    name: "[Giả lập] Ngoài trời · Nhiệt độ"
+    min: 10
+    max: 45
+    step: 0.1
+    initial: 27
+    unit_of_measurement: "°C"
+    mode: box
+  sim_living_room_humidity:
+    name: "[Giả lập] Phòng khách · Độ ẩm"
+    min: 20
+    max: 100
+    step: 1
+    initial: 68
+    unit_of_measurement: "%"
+    mode: box
+
+template:
+  - light:
+      - name: "Phòng khách · Đèn chính"
+        unique_id: truongha_light_living_room_main_light
+        default_entity_id: light.living_room_main_light
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.sim_living_room_main_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_living_room_main_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_living_room_main_light
+      - name: "Phòng khách · Đèn trang trí"
+        unique_id: truongha_light_living_room_accent_light
+        default_entity_id: light.living_room_accent_light
+        icon: mdi:led-strip-variant
+        state: "{{ is_state('input_boolean.sim_living_room_accent_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_living_room_accent_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_living_room_accent_light
+      - name: "Phòng ngủ master · Đèn trần"
+        unique_id: truongha_light_master_bedroom_ceiling_light
+        default_entity_id: light.master_bedroom_ceiling_light
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.sim_master_bedroom_ceiling_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_master_bedroom_ceiling_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_master_bedroom_ceiling_light
+      - name: "Phòng ngủ master · Đèn ngủ"
+        unique_id: truongha_light_master_bedroom_night_light
+        default_entity_id: light.master_bedroom_night_light
+        icon: mdi:lamp
+        state: "{{ is_state('input_boolean.sim_master_bedroom_night_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_master_bedroom_night_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_master_bedroom_night_light
+      - name: "Phòng bé · Đèn"
+        unique_id: truongha_light_kids_room_light
+        default_entity_id: light.kids_room_light
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.sim_kids_room_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_kids_room_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_kids_room_light
+      - name: "Bếp · Đèn"
+        unique_id: truongha_light_kitchen_light
+        default_entity_id: light.kitchen_light
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.sim_kitchen_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_kitchen_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_kitchen_light
+      - name: "Nhà tắm · Đèn"
+        unique_id: truongha_light_bathroom_light
+        default_entity_id: light.bathroom_light
+        icon: mdi:ceiling-light
+        state: "{{ is_state('input_boolean.sim_bathroom_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_bathroom_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_bathroom_light
+      - name: "Hành lang · Đèn"
+        unique_id: truongha_light_hallway_light
+        default_entity_id: light.hallway_light
+        icon: mdi:wall-sconce-flat
+        state: "{{ is_state('input_boolean.sim_hallway_light', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_hallway_light
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_hallway_light
+  - switch:
+      - name: "Bếp · Ổ cắm ấm siêu tốc"
+        unique_id: truongha_switch_kitchen_kettle_plug
+        default_entity_id: switch.kitchen_kettle_plug
+        icon: mdi:kettle
+        state: "{{ is_state('input_boolean.sim_kitchen_kettle_plug', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_kitchen_kettle_plug
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_kitchen_kettle_plug
+      - name: "Bếp · Ổ cắm nồi cơm"
+        unique_id: truongha_switch_kitchen_rice_cooker_plug
+        default_entity_id: switch.kitchen_rice_cooker_plug
+        icon: mdi:pot-steam
+        state: "{{ is_state('input_boolean.sim_kitchen_rice_cooker_plug', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_kitchen_rice_cooker_plug
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_kitchen_rice_cooker_plug
+      - name: "Nhà tắm · Bình nóng lạnh"
+        unique_id: truongha_switch_bathroom_water_heater
+        default_entity_id: switch.bathroom_water_heater
+        icon: mdi:water-boiler
+        state: "{{ is_state('input_boolean.sim_bathroom_water_heater', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_bathroom_water_heater
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_bathroom_water_heater
+      - name: "Căn hộ · Còi báo động"
+        unique_id: truongha_switch_apartment_siren
+        default_entity_id: switch.apartment_siren
+        icon: mdi:alarm-light
+        state: "{{ is_state('input_boolean.sim_apartment_siren', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_apartment_siren
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_apartment_siren
+      - name: "Phòng khách · Máy nén điều hòa"
+        unique_id: truongha_switch_living_room_ac_compressor
+        default_entity_id: switch.living_room_ac_compressor
+        icon: mdi:hvac
+        state: "{{ is_state('input_boolean.sim_living_room_ac_compressor', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_living_room_ac_compressor
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_living_room_ac_compressor
+      - name: "Phòng ngủ master · Máy nén điều hòa"
+        unique_id: truongha_switch_master_bedroom_ac_compressor
+        default_entity_id: switch.master_bedroom_ac_compressor
+        icon: mdi:hvac
+        state: "{{ is_state('input_boolean.sim_master_bedroom_ac_compressor', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_master_bedroom_ac_compressor
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_master_bedroom_ac_compressor
+      - name: "Phòng bé · Máy nén điều hòa"
+        unique_id: truongha_switch_kids_room_ac_compressor
+        default_entity_id: switch.kids_room_ac_compressor
+        icon: mdi:hvac
+        state: "{{ is_state('input_boolean.sim_kids_room_ac_compressor', 'on') }}"
+        turn_on:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_kids_room_ac_compressor
+        turn_off:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_kids_room_ac_compressor
+  - lock:
+      - name: "Cửa chính · Khóa"
+        unique_id: truongha_lock_front_door_lock
+        default_entity_id: lock.front_door_lock
+        state: "{{ 'locked' if is_state('input_boolean.sim_front_door_lock', 'on') else 'unlocked' }}"
+        lock:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_front_door_lock
+        unlock:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_front_door_lock
+  - cover:
+      - name: "Phòng khách · Rèm"
+        unique_id: truongha_cover_living_room_curtain
+        default_entity_id: cover.living_room_curtain
+        device_class: curtain
+        state: "{{ 'open' if is_state('input_boolean.sim_living_room_curtain', 'on') else 'closed' }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_living_room_curtain
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_living_room_curtain
+      - name: "Phòng ngủ master · Rèm"
+        unique_id: truongha_cover_master_bedroom_curtain
+        default_entity_id: cover.master_bedroom_curtain
+        device_class: curtain
+        state: "{{ 'open' if is_state('input_boolean.sim_master_bedroom_curtain', 'on') else 'closed' }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.sim_master_bedroom_curtain
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.sim_master_bedroom_curtain
+  - binary_sensor:
+      - name: "Cửa chính · Cảm biến cửa"
+        unique_id: truongha_binary_front_door_contact
+        default_entity_id: binary_sensor.front_door_contact
+        device_class: door
+        state: "{{ is_state('input_boolean.sim_front_door_contact', 'on') }}"
+      - name: "Hành lang · Chuyển động"
+        unique_id: truongha_binary_hallway_motion
+        default_entity_id: binary_sensor.hallway_motion
+        device_class: motion
+        state: "{{ is_state('input_boolean.sim_hallway_motion', 'on') }}"
+      - name: "Bếp · Khói"
+        unique_id: truongha_binary_kitchen_smoke
+        default_entity_id: binary_sensor.kitchen_smoke
+        device_class: smoke
+        state: "{{ is_state('input_boolean.sim_kitchen_smoke', 'on') }}"
+      - name: "Bếp · Gas"
+        unique_id: truongha_binary_kitchen_gas
+        default_entity_id: binary_sensor.kitchen_gas
+        device_class: gas
+        state: "{{ is_state('input_boolean.sim_kitchen_gas', 'on') }}"
+  - sensor:
+      - name: "Phòng khách · Nhiệt độ"
+        unique_id: truongha_sensor_living_room_temperature
+        default_entity_id: sensor.living_room_temperature
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.sim_living_room_temperature') | float(0) | round(1) }}"
+      - name: "Phòng ngủ master · Nhiệt độ"
+        unique_id: truongha_sensor_master_bedroom_temperature
+        default_entity_id: sensor.master_bedroom_temperature
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.sim_master_bedroom_temperature') | float(0) | round(1) }}"
+      - name: "Phòng bé · Nhiệt độ"
+        unique_id: truongha_sensor_kids_room_temperature
+        default_entity_id: sensor.kids_room_temperature
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.sim_kids_room_temperature') | float(0) | round(1) }}"
+      - name: "Ngoài trời · Nhiệt độ"
+        unique_id: truongha_sensor_outdoor_temperature
+        default_entity_id: sensor.outdoor_temperature
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: "°C"
+        state: "{{ states('input_number.sim_outdoor_temperature') | float(0) | round(1) }}"
+      - name: "Phòng khách · Độ ẩm"
+        unique_id: truongha_sensor_living_room_humidity
+        default_entity_id: sensor.living_room_humidity
+        device_class: humidity
+        state_class: measurement
+        unit_of_measurement: "%"
+        state: "{{ states('input_number.sim_living_room_humidity') | int(0) }}"
+
+climate:
+  - platform: generic_thermostat
+    name: "Living Room AC"
+    unique_id: truongha_climate_living_room
+    heater: switch.living_room_ac_compressor
+    target_sensor: sensor.living_room_temperature
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp: 25
+    target_temp_step: 1
+    precision: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    sleep_temp: 26
+    initial_hvac_mode: "off"
+  - platform: generic_thermostat
+    name: "Master Bedroom AC"
+    unique_id: truongha_climate_master_bedroom
+    heater: switch.master_bedroom_ac_compressor
+    target_sensor: sensor.master_bedroom_temperature
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp: 26
+    target_temp_step: 1
+    precision: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    sleep_temp: 26
+    initial_hvac_mode: "off"
+  - platform: generic_thermostat
+    name: "Kids Room AC"
+    unique_id: truongha_climate_kids_room
+    heater: switch.kids_room_ac_compressor
+    target_sensor: sensor.kids_room_temperature
+    ac_mode: true
+    min_temp: 16
+    max_temp: 30
+    target_temp: 26
+    target_temp_step: 1
+    precision: 0.5
+    cold_tolerance: 0.3
+    hot_tolerance: 0.3
+    sleep_temp: 26
+    initial_hvac_mode: "off"
+
+media_player:
+  - platform: universal
+    name: "Living Room TV"
+    unique_id: truongha_media_living_room_tv
+    state_template: "{{ 'on' if is_state('input_boolean.sim_living_room_tv', 'on') else 'off' }}"
+    commands:
+      turn_on:
+        action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.sim_living_room_tv
+      turn_off:
+        action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.sim_living_room_tv

@@ -1,0 +1,548 @@
+# Kịch bản "Một ngày trong căn hộ thông minh".
+# - Các automation phản ứng với cảm biến và đồng hồ như một hệ thống thật.
+# - Đồng hồ kịch bản (input_datetime.scenario_time) thay cho giờ thật, để người thuyết trình
+#   "tua" tới 6:30, 14:00, 22:30... mà không phải chờ.
+# - Các script demo_* là nút bấm trên dashboard "Điều khiển demo".
+
+input_datetime:
+  scenario_time:
+    name: "Giờ trong kịch bản"
+    icon: mdi:clock-outline
+    has_date: false
+    has_time: true
+    initial: "05:55"
+
+input_select:
+  home_mode:
+    name: "Chế độ nhà"
+    icon: mdi:home-switch
+    options:
+      - "Ở nhà"
+      - "Đi vắng"
+      - "Ban đêm"
+    initial: "Ban đêm"
+
+input_number:
+  distance_to_home:
+    name: "Anh Minh cách nhà"
+    icon: mdi:map-marker-distance
+    min: 0
+    max: 20
+    step: 0.5
+    initial: 0
+    unit_of_measurement: km
+    mode: slider
+
+input_boolean:
+  notification_visible:
+    name: "Đang hiện thông báo trên dashboard"
+
+input_text:
+  notification_title:
+    name: "Thông báo: tiêu đề"
+    max: 120
+  notification_message:
+    name: "Thông báo: nội dung"
+    max: 255
+  notification_level:
+    name: "Thông báo: mức độ"
+    max: 20
+    initial: info
+  phone_notify_service:
+    name: "Dịch vụ thông báo điện thoại"
+    icon: mdi:cellphone-message
+    # Ví dụ: mobile_app_truong_iphone (xem README, mục "Nhận thông báo trên điện thoại")
+    max: 100
+    initial: ""
+
+template:
+  - binary_sensor:
+      - name: "Ngoài trời · Trời tối"
+        unique_id: truongha_outdoor_is_dark
+        default_entity_id: binary_sensor.outdoor_is_dark
+        icon: mdi:weather-night
+        state: >
+          {% set h = states('input_datetime.scenario_time')[:2] | int(12) %}
+          {{ h >= 18 or h < 6 }}
+
+script:
+  truongha_notify:
+    alias: "Gửi thông báo TruongHA"
+    icon: mdi:bell-ring
+    description: "Hiện thông báo trên dashboard, trong mục Thông báo và trên điện thoại (nếu đã cài app)."
+    mode: queued
+    fields:
+      title:
+        description: Tiêu đề
+      message:
+        description: Nội dung
+      level:
+        description: "info / success / warning / critical"
+      image:
+        description: Đường dẫn ảnh (tùy chọn)
+      buttons:
+        description: Danh sách nút bấm trên thông báo điện thoại (tùy chọn)
+    variables:
+      now_time: "{{ states('input_datetime.scenario_time')[:5] }}"
+      notify_service: "{{ states('input_text.phone_notify_service') | trim }}"
+    sequence:
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.notification_title
+        data:
+          value: "{{ now_time }} · {{ title }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.notification_message
+        data:
+          value: "{{ message[:255] }}"
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.notification_level
+        data:
+          value: "{{ level | default('info') }}"
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.notification_visible
+      - action: persistent_notification.create
+        data:
+          title: "{{ now_time }} · {{ title }}"
+          message: >
+            {{ message }}{% if image is defined and image %}
+
+            ![Ảnh camera]({{ image }}){% endif %}
+      - if:
+          - condition: template
+            value_template: "{{ notify_service not in ['', 'unknown', 'unavailable'] }}"
+        then:
+          - action: "notify.{{ notify_service }}"
+            continue_on_error: true
+            data:
+              title: "{{ title }}"
+              message: "{{ message }}"
+              data:
+                image: "{{ image | default('') }}"
+                actions: "{{ buttons | default([]) }}"
+                push:
+                  interruption-level: "{{ 'critical' if level == 'critical' else 'active' }}"
+                ttl: 0
+                priority: high
+
+  hide_notification:
+    alias: "Ẩn thông báo"
+    icon: mdi:bell-off
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.notification_visible
+
+  # ---------- Các chế độ khách hàng bấm trên dashboard ----------
+  mode_away:
+    alias: "Đi vắng"
+    icon: mdi:home-export-outline
+    sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.home_mode
+        data:
+          option: "Đi vắng"
+
+  mode_home:
+    alias: "Ở nhà"
+    icon: mdi:home-account
+    sequence:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.apartment_security
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.home_mode
+        data:
+          option: "Ở nhà"
+
+  mode_movie:
+    alias: "Xem phim"
+    icon: mdi:movie-open
+    sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.living_room_main_light
+      - action: light.turn_on
+        target:
+          entity_id: light.living_room_accent_light
+      - action: cover.close_cover
+        target:
+          entity_id: cover.living_room_curtain
+      - action: media_player.turn_on
+        target:
+          entity_id: media_player.living_room_tv
+
+  mode_sleep:
+    alias: "Đi ngủ"
+    icon: mdi:bed
+    sequence:
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.home_mode
+        data:
+          option: "Ban đêm"
+      - action: light.turn_off
+        target:
+          entity_id: all
+      - action: media_player.turn_off
+        target:
+          entity_id: media_player.living_room_tv
+      - action: cover.close_cover
+        target:
+          entity_id: all
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: climate.living_room_ac
+        data:
+          hvac_mode: "off"
+      - action: climate.set_hvac_mode
+        target:
+          entity_id:
+            - climate.master_bedroom_ac
+            - climate.kids_room_ac
+        data:
+          hvac_mode: cool
+      - action: climate.set_preset_mode
+        target:
+          entity_id:
+            - climate.master_bedroom_ac
+            - climate.kids_room_ac
+        data:
+          preset_mode: sleep
+      - action: alarm_control_panel.alarm_arm_night
+        target:
+          entity_id: alarm_control_panel.apartment_security
+      - if:
+          - condition: state
+            entity_id: lock.front_door_lock
+            state: unlocked
+        then:
+          - action: script.truongha_notify
+            data:
+              title: "Cửa chính chưa khóa"
+              message: "Cả nhà đã đi ngủ nhưng cửa chính vẫn chưa khóa. Bấm \"Khóa cửa\" để khóa từ xa."
+              level: warning
+              buttons:
+                - action: LOCK_FRONT_DOOR
+                  title: "Khóa cửa"
+        else:
+          - action: script.truongha_notify
+            data:
+              title: "Chúc cả nhà ngủ ngon"
+              message: "Đã tắt đèn, đóng rèm, điều hòa phòng ngủ chuyển chế độ ngủ 26°C. Cửa đã khóa, an ninh ban đêm đã bật."
+              level: success
+
+  turn_off_kitchen_plugs:
+    alias: "Tắt ổ cắm bếp"
+    icon: mdi:power-plug-off
+    sequence:
+      - action: switch.turn_off
+        target:
+          entity_id:
+            - switch.kitchen_kettle_plug
+            - switch.kitchen_rice_cooker_plug
+      - action: script.truongha_notify
+        data:
+          title: "Đã tắt ổ cắm bếp"
+          message: "Ấm siêu tốc và nồi cơm đã được tắt từ xa."
+          level: success
+
+  lock_front_door_remotely:
+    alias: "Khóa cửa từ xa"
+    icon: mdi:lock
+    sequence:
+      - action: lock.lock
+        target:
+          entity_id: lock.front_door_lock
+      - action: script.truongha_notify
+        data:
+          title: "Đã khóa cửa chính"
+          message: "Cửa chính đã được khóa từ xa. Chúc cả nhà ngủ ngon."
+          level: success
+
+automation:
+  # ---------- Cảnh 1: buổi sáng ----------
+  - id: truongha_water_heater_6am
+    alias: "TruongHA water heater 6am"
+    description: "Buổi sáng: bật bình nóng lạnh lúc 6:00"
+    triggers:
+      - trigger: template
+        value_template: "{{ states('input_datetime.scenario_time')[:5] == '06:00' }}"
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.bathroom_water_heater
+
+  - id: truongha_good_morning
+    alias: "TruongHA good morning"
+    description: "Buổi sáng: chào buổi sáng lúc 6:30"
+    triggers:
+      - trigger: template
+        value_template: "{{ states('input_datetime.scenario_time')[:5] == '06:30' }}"
+    actions:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.apartment_security
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.home_mode
+        data:
+          option: "Ở nhà"
+      - action: light.turn_on
+        target:
+          entity_id: light.master_bedroom_ceiling_light
+      - action: cover.open_cover
+        target:
+          entity_id: all
+      - action: climate.set_hvac_mode
+        target:
+          entity_id:
+            - climate.master_bedroom_ac
+            - climate.kids_room_ac
+        data:
+          hvac_mode: "off"
+      - action: script.truongha_notify
+        data:
+          title: "Chào buổi sáng nhà anh Minh!"
+          message: "Ngoài trời {{ states('sensor.outdoor_temperature') }}°C. Đã mở rèm, tắt điều hòa phòng ngủ. Bình nóng lạnh đã bật từ 6:00, nước nóng sẵn sàng."
+          level: info
+
+  # ---------- Cảnh 2: đi vắng ----------
+  - id: truongha_leave_home
+    alias: "TruongHA leave home"
+    description: "Đi vắng: tắt hết, khóa cửa, bật an ninh"
+    triggers:
+      - trigger: state
+        entity_id: input_select.home_mode
+        to: "Đi vắng"
+    actions:
+      - action: light.turn_off
+        target:
+          entity_id: all
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: all
+        data:
+          hvac_mode: "off"
+      - action: media_player.turn_off
+        target:
+          entity_id: media_player.living_room_tv
+      - action: cover.close_cover
+        target:
+          entity_id: all
+      - action: switch.turn_off
+        target:
+          entity_id: switch.bathroom_water_heater
+      - action: lock.lock
+        target:
+          entity_id: lock.front_door_lock
+      - action: alarm_control_panel.alarm_arm_away
+        target:
+          entity_id: alarm_control_panel.apartment_security
+      # Ổ cắm bếp không tự tắt (có thể đang nấu cơm hẹn giờ): hỏi chủ nhà.
+      - variables:
+          plugs_on: >
+            {{ ['switch.kitchen_kettle_plug', 'switch.kitchen_rice_cooker_plug']
+               | select('is_state', 'on') | map('state_attr', 'friendly_name')
+               | map('replace', 'Bếp · Ổ cắm ', '') | list }}
+      - if:
+          - condition: template
+            value_template: "{{ plugs_on | count > 0 }}"
+        then:
+          - action: script.truongha_notify
+            data:
+              title: "Ổ cắm bếp vẫn đang bật"
+              message: "Cả nhà đã ra khỏi nhà nhưng {{ plugs_on | join(' và ') }} vẫn đang bật. Bạn có muốn tắt không?"
+              level: warning
+              buttons:
+                - action: TURN_OFF_KITCHEN_PLUGS
+                  title: "Tắt ngay"
+        else:
+          - action: script.truongha_notify
+            data:
+              title: "Đã bật chế độ đi vắng"
+              message: "Đã tắt đèn, điều hòa, TV, bình nóng lạnh; đóng rèm, khóa cửa và bật an ninh."
+              level: success
+
+  - id: truongha_notification_actions
+    alias: "TruongHA notification actions"
+    description: "Điện thoại: xử lý nút bấm trên thông báo"
+    triggers:
+      - trigger: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: TURN_OFF_KITCHEN_PLUGS
+        id: turn_off_plugs
+      - trigger: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: LOCK_FRONT_DOOR
+        id: lock_door
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: turn_off_plugs
+            sequence:
+              - action: script.turn_off_kitchen_plugs
+          - conditions:
+              - condition: trigger
+                id: lock_door
+            sequence:
+              - action: script.lock_front_door_remotely
+
+  # ---------- Cảnh 5: về nhà ----------
+  - id: truongha_precool_before_arrival
+    alias: "TruongHA precool before arrival"
+    description: "Về nhà: còn 2 km thì bật điều hòa phòng khách"
+    triggers:
+      - trigger: numeric_state
+        entity_id: input_number.distance_to_home
+        below: 2.1
+    conditions:
+      - condition: state
+        entity_id: input_select.home_mode
+        state: "Đi vắng"
+      - condition: numeric_state
+        entity_id: input_number.distance_to_home
+        above: 0.4
+    actions:
+      - action: climate.set_hvac_mode
+        target:
+          entity_id: climate.living_room_ac
+        data:
+          hvac_mode: cool
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.living_room_ac
+        data:
+          temperature: 25
+      - action: script.truongha_notify
+        data:
+          title: "Anh Minh sắp về tới nhà"
+          message: "Còn khoảng {{ states('input_number.distance_to_home') | float | round(1) }} km. Đã bật trước điều hòa phòng khách 25°C (trong nhà đang {{ states('sensor.living_room_temperature') }}°C)."
+          level: info
+
+  - id: truongha_arrive_home
+    alias: "TruongHA arrive home"
+    description: "Về nhà: mở khóa cửa thì tắt an ninh, trời tối thì bật đèn"
+    triggers:
+      - trigger: state
+        entity_id: lock.front_door_lock
+        to: unlocked
+    conditions:
+      - condition: state
+        entity_id: input_select.home_mode
+        state: "Đi vắng"
+      # Chỉ khi điện thoại chủ nhà đang ở nhà (người giúp việc dùng mã tạm thì không tính)
+      - condition: numeric_state
+        entity_id: input_number.distance_to_home
+        below: 0.5
+    actions:
+      - action: alarm_control_panel.alarm_disarm
+        target:
+          entity_id: alarm_control_panel.apartment_security
+      - action: input_select.select_option
+        target:
+          entity_id: input_select.home_mode
+        data:
+          option: "Ở nhà"
+      - if:
+          - condition: state
+            entity_id: binary_sensor.outdoor_is_dark
+            state: "on"
+        then:
+          - action: light.turn_on
+            target:
+              entity_id:
+                - light.hallway_light
+                - light.living_room_main_light
+      - action: script.truongha_notify
+        data:
+          title: "Chào mừng về nhà!"
+          message: "An ninh đã tắt{{ ', đèn hành lang và phòng khách đã bật' if is_state('binary_sensor.outdoor_is_dark', 'on') else '' }}. Phòng khách đang {{ states('sensor.living_room_temperature') }}°C."
+          level: success
+
+  # ---------- Cảnh 6: ban đêm ----------
+  - id: truongha_night_path_light
+    alias: "TruongHA night path light"
+    description: "Ban đêm: có người đi lại thì bật đèn hành lang và nhà tắm"
+    mode: restart
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.hallway_motion
+        to: "on"
+    conditions:
+      - condition: state
+        entity_id: input_select.home_mode
+        state: "Ban đêm"
+    actions:
+      - action: light.turn_on
+        target:
+          entity_id:
+            - light.hallway_light
+            - light.bathroom_light
+      - wait_for_trigger:
+          - trigger: state
+            entity_id: binary_sensor.hallway_motion
+            to: "off"
+            # Nhà thật nên để 2 phút; để 20 giây cho demo nhanh
+            for: "00:00:20"
+      - action: light.turn_off
+        target:
+          entity_id:
+            - light.hallway_light
+            - light.bathroom_light
+
+  # ---------- Mô phỏng nhiệt độ phòng ----------
+  - id: truongha_simulate_temperature
+    alias: "TruongHA simulate temperature"
+    description: "Giả lập: nhiệt độ phòng thay đổi theo điều hòa"
+    mode: single
+    triggers:
+      - trigger: time_pattern
+        seconds: "/10"
+    actions:
+      - repeat:
+          for_each:
+            - living_room
+            - master_bedroom
+            - kids_room
+          sequence:
+            - variables:
+                current_temp: "{{ states('input_number.sim_' ~ repeat.item ~ '_temperature') | float(28) }}"
+                outdoor_temp: "{{ states('input_number.sim_outdoor_temperature') | float(30) }}"
+                new_temp: >
+                  {% if is_state('switch.' ~ repeat.item ~ '_ac_compressor', 'on') %}
+                    {{ [current_temp - 0.3, 16] | max }}
+                  {% elif current_temp < outdoor_temp - 1 %}
+                    {{ current_temp + 0.1 }}
+                  {% else %}
+                    {{ current_temp }}
+                  {% endif %}
+            - action: input_number.set_value
+              target:
+                entity_id: "input_number.sim_{{ repeat.item }}_temperature"
+              data:
+                value: "{{ new_temp | float | round(1) }}"
+
+  - id: truongha_apply_theme
+    alias: "TruongHA apply theme"
+    description: "Giao diện: dùng theme TruongHA"
+    triggers:
+      - trigger: homeassistant
+        event: start
+    actions:
+      - action: frontend.set_theme
+        data:
+          name: TruongHA
+          mode: light
+      - action: frontend.set_theme
+        data:
+          name: TruongHA
+          mode: dark
