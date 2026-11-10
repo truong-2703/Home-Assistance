@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TruongHA · Digital Twin 3D</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:#081321;color:#e7f2ff}header{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid #253b50;background:#101f30}h1{font-size:19px;margin:0}small{color:#9bb1c7}.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;height:calc(100vh - 66px)}#scene{min-height:480px;position:relative}aside{overflow:auto;background:#101f30;border-left:1px solid #253b50;padding:18px}section{background:#172a3d;border:1px solid #2b455c;border-radius:12px;padding:13px;margin-bottom:14px}h2{font-size:15px;margin:0 0 12px}label{font-size:12px;color:#a9bed0}input{width:100%;background:#081321;border:1px solid #456078;border-radius:7px;color:white;padding:9px;margin:6px 0 10px}button{cursor:pointer;border:1px solid #3c6078;border-radius:7px;background:#23445b;color:white;padding:9px 12px}button:hover{background:#316783}button:disabled{opacity:.4;cursor:not-allowed}.item{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid #2d4459;padding:9px 0;font-size:13px}.item button{min-width:70px}.dot{width:9px;height:9px;border-radius:50%;background:#e99a56;display:inline-block;margin-right:7px}.dot.online{background:#55d9a1}.muted{color:#a9bed0;font-size:12px}#hint{position:absolute;bottom:16px;left:18px;background:#081321bb;border-radius:8px;padding:10px;font-size:12px}#notice{color:#ffcc8a;font-size:12px;overflow-wrap:anywhere}@media(max-width:800px){.layout{display:flex;flex-direction:column;height:auto}#scene{height:58vh;min-height:350px}aside{border-left:0}}
+</style></head><body>
+<header><div><h1>TruongHA · Digital Twin 3D</h1><small>Căn hộ 2 phòng ngủ · Bản thử nghiệm</small></div><span id="status"><span class="dot"></span>Chưa kết nối</span></header>
+<div class="layout"><main id="scene"><div id="hint">Kéo để xoay · Cuộn để zoom · Chạm đèn để bật/tắt</div></main>
+<aside><section><h2>Kết nối Home Assistant</h2><label>WebSocket URL (cùng máy: tự động)</label><input id="url" placeholder="ws://localhost:8123/api/websocket"><label>Long-lived access token</label><input id="token" type="password" placeholder="Dán token từ hồ sơ Home Assistant"><button id="connect">Kết nối</button> <button id="disconnect">Ngắt</button><p id="notice">Token chỉ giữ trong bộ nhớ tab, không ghi vào mã nguồn hoặc localStorage.</p></section>
+<section><h2>Thiết bị căn hộ</h2><div id="devices"></div></section><section><h2>Cảm biến</h2><div id="sensors"></div></section><section><h2>Chế độ</h2><p class="muted">Chưa kết nối: hiển thị trạng thái minh họa. Khi kết nối, chỉ trạng thái xác nhận từ Home Assistant được dùng để cập nhật mô hình.</p></section></aside></div>
+<script type="module">
+import * as THREE from 'https://esm.sh/three@0.170.0';
+import {OrbitControls} from 'https://esm.sh/three@0.170.0/examples/jsm/controls/OrbitControls.js';
+const mount=document.getElementById('scene'),scene=new THREE.Scene();scene.background=new THREE.Color(0x081321);
+const camera=new THREE.PerspectiveCamera(42,1,.1,100);camera.position.set(11,14,17);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;mount.prepend(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,0);controls.enableDamping=true;controls.maxPolarAngle=Math.PI/2.08;controls.minDistance=7;controls.maxDistance=33;
+scene.add(new THREE.HemisphereLight(0xbddfff,0x324050,2));const sun=new THREE.DirectionalLight(0xffffff,2);sun.position.set(7,16,10);sun.castShadow=true;scene.add(sun);
+const box=(w,h,d,color,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color,roughness:.75}));m.position.set(x,y,z);m.receiveShadow=true;scene.add(m);return m};
+box(12,.22,9,0x526b77,0,-.15,0);
+const rooms=[{name:'Phòng khách',x:-3.1,z:-2,w:5.8,d:4.5,color:0x2b5362},{name:'Phòng master',x:3.1,z:-2,w:5.8,d:4.5,color:0x594f76},{name:'Phòng bé',x:3.1,z:2.4,w:5.8,d:4.1,color:0x536d5a},{name:'Bếp',x:-3.1,z:2.4,w:5.8,d:4.1,color:0x665c49}];
+const edges=[];for(const r of rooms){box(r.w,.035,r.d,r.color,r.x,.01,r.z);const wallMat=0xb4c5ce;for(const [w,d,x,z] of [[r.w,.12,r.x,r.z-r.d/2],[.12,r.d,r.x-r.w/2,r.z]]){const m=box(w,1.15,d,wallMat,x,.55,z);m.material.transparent=true;m.material.opacity=.6;} }
+box(.12,.9,9,0x9fb1bd,0,.4,0);box(12,.9,.12,0x9fb1bd,0,.4,.23);
+function furniture(r){box(1.6,.35,.85,0x8bafa9,r.x,.23,r.z+.3);box(.9,.35,.5,0x263a50,r.x+.1,.55,r.z-1)}
+rooms.forEach(furniture);
+const deviceSpecs=[
+{id:'light.living_room_main_light',name:'Đèn phòng khách',room:0,x:-3.1,z:-2},
+{id:'light.living_room_accent_light',name:'Đèn trang trí',room:0,x:-4.8,z:-1},
+{id:'light.master_bedroom_ceiling_light',name:'Đèn phòng master',room:1,x:3.1,z:-2},
+{id:'light.master_bedroom_night_light',name:'Đèn ngủ master',room:1,x:4.7,z:-1},
+{id:'light.kids_room_light',name:'Đèn phòng bé',room:2,x:3.1,z:2.4},
+{id:'light.kitchen_light',name:'Đèn bếp',room:3,x:-3.1,z:2.4},
+{id:'light.bathroom_light',name:'Đèn nhà tắm',room:3,x:-4.9,z:3.4},
+{id:'light.hallway_light',name:'Đèn hành lang',room:3,x:-1.1,z:3.5},
+{id:'cover.living_room_curtain',name:'Rèm phòng khách'},
+{id:'cover.master_bedroom_curtain',name:'Rèm phòng master'},
+{id:'lock.front_door_lock',name:'Khóa cửa chính'},
+{id:'climate.living_room_ac',name:'Điều hòa phòng khách'},
+{id:'climate.master_bedroom_ac',name:'Điều hòa master'},
+{id:'climate.kids_room_ac',name:'Điều hòa phòng bé'}
+];
+const sensors=[['sensor.living_room_temperature','Nhiệt độ phòng khách'],['sensor.master_bedroom_temperature','Nhiệt độ phòng master'],['sensor.kids_room_temperature','Nhiệt độ phòng bé'],['sensor.living_room_humidity','Độ ẩm phòng khách'],['binary_sensor.kitchen_smoke','Cảm biến khói'],['binary_sensor.kitchen_gas','Cảm biến gas']];
+const states=new Map(),bulbs=new Map(),pickables=[];
+for(const d of deviceSpecs.filter(v=>v.id.startsWith('light.'))){const mesh=new THREE.Mesh(new THREE.SphereGeometry(.18,16,12),new THREE.MeshStandardMaterial({color:0x647889,emissive:0x000000}));mesh.position.set(d.x,.9,d.z);mesh.userData.id=d.id;scene.add(mesh);pickables.push(mesh);bulbs.set(d.id,{mesh,light:new THREE.PointLight(0xffd88a,0,3.5)});const obj=bulbs.get(d.id);obj.light.position.copy(mesh.position);scene.add(obj.light)}
+let ws=null,authenticated=false,requestId=1,manualClose=false;const status=document.getElementById('status'),notice=document.getElementById('notice');
+function setStatus(ok,msg){status.innerHTML='<span class="dot '+(ok?'online':'')+'"></span>'+msg}
+function serviceFor(d,state){const domain=d.id.split('.')[0];if(domain==='light')return state==='on'?'turn_off':'turn_on';if(domain==='cover')return state==='open'?'close_cover':'open_cover';if(domain==='lock')return state==='locked'?'unlock':'lock';if(domain==='climate')return state==='off'?'turn_on':'turn_off';return null}
+function act(d){if(!authenticated||!ws||ws.readyState!==1)return;const state=states.get(d.id)?.state||'off';const service=serviceFor(d,state);if(!service)return;ws.send(JSON.stringify({id:requestId++,type:'call_service',domain:d.id.split('.')[0],service,target:{entity_id:d.id}}))}
+function update(){const list=document.getElementById('devices');list.replaceChildren();for(const d of deviceSpecs){const s=states.get(d.id),state=s?.state||'—',row=document.createElement('div');row.className='item';const label=document.createElement('span');label.textContent=d.name+' · '+state;const btn=document.createElement('button');btn.textContent=d.id.startsWith('climate.')?(state==='off'?'Bật':'Tắt'):d.id.startsWith('lock.')?(state==='locked'?'Mở khóa':'Khóa'):d.id.startsWith('cover.')?(state==='open'?'Đóng':'Mở'):(state==='on'?'Tắt':'Bật');btn.disabled=!authenticated||!s||['unavailable','unknown'].includes(state);btn.onclick=()=>act(d);row.append(label,btn);list.append(row)}
+const sensorList=document.getElementById('sensors');sensorList.replaceChildren();for(const [id,name] of sensors){const el=document.createElement('div');el.className='item';const s=states.get(id);el.textContent=name+': '+(s?s.state+(s.attributes?.unit_of_measurement||''):'—');sensorList.append(el)}
+for(const [id,b] of bulbs){const on=states.get(id)?.state==='on';b.mesh.material.color.setHex(on?0xffdf8e:0x647889);b.mesh.material.emissive.setHex(on?0xffb529:0x000000);b.light.intensity=on?3:0}}
+update();
+const urlInput=document.getElementById('url');urlInput.value=(location.protocol==='https:'?'wss:':'ws:')+'//'+(location.host||'localhost:8123')+'/api/websocket';
+document.getElementById('connect').onclick=()=>{const token=document.getElementById('token').value.trim();if(!token){notice.textContent='Cần token Home Assistant để kết nối.';return}if(ws)ws.close();manualClose=false;authenticated=false;states.clear();update();try{ws=new WebSocket(urlInput.value.trim());setStatus(false,'Đang kết nối');ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='auth_required'){ws.send(JSON.stringify({type:'auth',access_token:token}))}else if(m.type==='auth_ok'){authenticated=true;setStatus(true,'Đã kết nối');notice.textContent='Đồng bộ dữ liệu Home Assistant đang hoạt động.';ws.send(JSON.stringify({id:requestId++,type:'get_states'}));ws.send(JSON.stringify({id:requestId++,type:'subscribe_events',event_type:'state_changed'}))}else if(m.type==='auth_invalid'){notice.textContent='Token không hợp lệ.';ws.close()}else if(m.type==='result'&&m.success&&Array.isArray(m.result)){m.result.forEach(s=>states.set(s.entity_id,s));update()}else if(m.type==='event'&&m.event?.data?.new_state){const s=m.event.data.new_state;states.set(s.entity_id,s);update()}};ws.onclose=()=>{authenticated=false;setStatus(false,'Mất kết nối');update();if(!manualClose)notice.textContent='Đã ngắt kết nối. Bấm Kết nối để thử lại.'};ws.onerror=()=>{notice.textContent='Lỗi WebSocket. Kiểm tra URL, HTTPS/WSS và quyền truy cập.'}}catch(e){notice.textContent=e.message}};
+document.getElementById('disconnect').onclick=()=>{manualClose=true;if(ws)ws.close();states.clear();authenticated=false;update()};
+const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();let down=null;renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>7)return;const r=renderer.domElement.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(pickables)[0];if(hit){const d=deviceSpecs.find(d=>d.id===hit.object.userData.id);if(d)act(d)}});
+function resize(){const w=mount.clientWidth,h=mount.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(mount);resize();
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
+</script></body></html>
