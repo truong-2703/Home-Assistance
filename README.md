@@ -31,6 +31,7 @@ Lần đầu Docker tải image Home Assistant (khoảng 1–2 GB), mất vài p
 3. Ở thanh bên trái:
    - **TruongHA**: màn hình cho khách xem (sơ đồ nhà, các phòng, an ninh, năng lượng)
    - **Điều khiển demo**: bảng nút bấm và lời dẫn cho người thuyết trình
+   - **Căn hộ 3D**: mô hình 3D của căn hộ, điều khiển được thiết bị (xem [docs/digital-twin.md](docs/digital-twin.md))
 4. Bấm **Khôi phục từ đầu** rồi đi lần lượt từng cảnh.
 
 Lệnh hay dùng:
@@ -81,7 +82,9 @@ homeassistant/              Thư mục cấu hình Home Assistant DUY NHẤT c�
     demo_control.yaml    Dashboard người thuyết trình
   themes/truongha.yaml      Màu thương hiệu TruongHA
   www/                      Sơ đồ căn hộ, ảnh camera giả lập
+  www/digital-twin/         Panel Căn hộ 3D (Three.js đóng gói sẵn trong vendor/)
 docs/demo-script.md       Kịch bản demo đã chốt
+docs/digital-twin.md      Căn hộ 3D: cách chạy, phạm vi, an toàn
 ```
 
 ### Quy ước đặt tên

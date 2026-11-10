@@ -136,6 +136,16 @@ views:
             tap_action:
               action: perform-action
               perform_action: script.mode_sleep
+          - type: button
+            name: Xem căn hộ 3D
+            icon: mdi:cube-outline
+            show_state: false
+            grid_options:
+              columns: full
+              rows: 1
+            tap_action:
+              action: navigate
+              navigation_path: /digital-twin
           - type: picture-elements
             grid_options:
               columns: full

@@ -79,6 +79,7 @@ views:
               - "Đây là toàn bộ ngôi nhà trên một màn hình, điện thoại cũng giống hệt."
               - Chỉ vào sơ đồ: phòng nào sáng đèn, nhiệt độ từng phòng, cửa đang khóa.
               - Bấm thử vào một phòng trên sơ đồ để bật/tắt đèn.
+              - Bấm **Xem căn hộ 3D** (hoặc mục **Căn hộ 3D** ở thanh bên): cùng căn hộ ở dạng 3D, xoay/zoom được, chạm bóng đèn để bật/tắt.
       - type: grid
         cards:
           - type: heading

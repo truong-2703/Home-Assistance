@@ -1,35 +1,46 @@
-# TruongHA Digital Twin — MVP
+# TruongHA · Căn hộ 3D (Digital Twin)
 
-Interactive 3D apartment built with Three.js and Home Assistant WebSocket API.
+Mô hình 3D của căn hộ demo, dựng bằng Three.js và nhúng thẳng vào Home Assistant dưới dạng **custom panel**.
+Trạng thái thiết bị trong mô hình luôn khớp với Home Assistant, và bấm trên mô hình sẽ điều khiển thiết bị thật (hoặc thiết bị giả lập).
 
-## Run
+## Chạy
 
-1. Check out `feature/digital-twin` and run `docker compose up -d`.
-2. Open Home Assistant at `http://localhost:8123` and complete setup if needed.
-3. Open `http://localhost:8123/local/digital-twin/index.html` (Home Assistant serves files in `homeassistant/www` under `/local`).
-4. In Home Assistant, create a **Long-Lived Access Token** from your profile. Paste it into the Digital Twin page and click **Kết nối**. The token is held in the page's memory only.
-5. Toggle a light in Home Assistant: the matching 3D bulb should update. Click a 3D bulb or a sidebar button to call the corresponding Home Assistant service.
+1. `docker compose up -d`, mở `http://localhost:8123` và đăng nhập (`truongha` / `truongha123`).
+2. Chọn **Căn hộ 3D** ở thanh bên, hoặc bấm **Xem căn hộ 3D** trên dashboard TruongHA, hoặc mở thẳng
+   `http://localhost:8123/digital-twin`.
+3. Kéo để xoay, cuộn để zoom, chạm bóng đèn để bật/tắt. Cột bên phải có các nút điều khiển và cảm biến.
 
-## Scope
+Không cần tạo hay dán token: panel dùng luôn phiên đăng nhập của Home Assistant.
 
-- Stylized four-zone 3D floorplan: living room, master bedroom, kids room, kitchen. Hallway and bathroom light points are currently represented in the kitchen zone. This is a conceptual layout, **not an architectural plan**.
-- State sync: `get_states` + `state_changed` WebSocket events.
-- Light on/off, curtain open/close, door lock/unlock, climate on/off; sensors displayed read-only.
-- No command is sent while disconnected. UI uses the **confirmed state** from Home Assistant, not optimistic local toggles.
-- Existing Home Assistant packages and automations are unchanged.
+## Cấu trúc
 
-## Security / limitations
+| File | Vai trò |
+|---|---|
+| `homeassistant/configuration.yaml` (mục `panel_custom`) | Đăng ký panel `/digital-twin` ở thanh bên |
+| `homeassistant/www/digital-twin/truongha-digital-twin.js` | Web component `truongha-digital-twin`: cảnh 3D, danh sách thiết bị, gọi dịch vụ |
+| `homeassistant/www/digital-twin/vendor/` | Three.js 0.170 đóng gói sẵn (giấy phép MIT), để chạy khi không có internet |
 
-- Use only on a trusted local network. Do **not** expose port 8123 or your long-lived token to the public internet.
-- Token is never written to localStorage or committed. For a production release, use Home Assistant authentication/session integration instead of manually pasted long-lived tokens.
-- The page imports Three.js modules from a CDN; initial rendering requires internet access. Vendor dependencies locally for an offline deployment.
-- Browser WebSocket connectivity may depend on network reachability, origin and TLS settings.
-- A Home Assistant runtime / browser test has **not yet been performed**; this is an initial implementation for review.
-- Treat lock controls as security-sensitive; production deployment should add confirmation/authorization UX.
+Khi sửa file JS, tăng số `?v=` trong `module_url` để trình duyệt không dùng bản cũ trong bộ nhớ đệm.
 
-## Next milestones
+## Phạm vi
 
-1. Replace conceptual rooms with an accurate 2-bedroom apartment floorplan and furniture.
-2. Embed the view in a Home Assistant dashboard, use Home Assistant authenticated session rather than a pasted token.
-3. Add camera presets, curtains and doors animations, temperature overlays, alarm states.
-4. Automated tests against a simulated Home Assistant instance.
+- Bố cục 3D **minh họa** gồm 4 khu: phòng khách, phòng master, phòng bé, bếp. Đèn nhà tắm và hành lang tạm đặt trong khu bếp.
+  Đây không phải bản vẽ kiến trúc và chưa khớp với sơ đồ 2D trên dashboard.
+- Đồng bộ trạng thái qua đối tượng `hass` mà Home Assistant truyền cho panel (cập nhật tức thì khi có thay đổi).
+- Điều khiển: đèn bật/tắt, rèm mở/đóng, khóa cửa khóa/mở, điều hòa bật/tắt. Cảm biến chỉ hiển thị.
+- Tình trạng căn hộ: giờ kịch bản, chế độ nhà, an ninh, công suất.
+- Giao diện chỉ dùng **trạng thái đã được Home Assistant xác nhận**, không tự đổi trước khi lệnh chạy xong.
+- Lệnh không thực hiện được thì hiện thông báo lỗi ngay trên panel.
+
+## An toàn
+
+- **Mở khóa cửa phải bấm hai lần** (lần hai trong vòng 4 giây). Khóa cửa thì bấm một lần.
+- Panel chỉ chạy bên trong Home Assistant đã đăng nhập; không có token nào nằm trong mã nguồn hay bộ nhớ trình duyệt.
+- Chỉ dùng trong mạng nội bộ tin cậy. Không mở cổng 8123 ra internet.
+
+## Bước tiếp theo
+
+1. Dựng lại 6 phòng đúng theo sơ đồ 2D của căn hộ, có nội thất.
+2. Thêm góc camera đặt sẵn, hiệu ứng rèm/cửa, lớp màu nhiệt độ, trạng thái báo động trên mô hình.
+3. Thêm rèm, khóa, cảm biến khói/gas vào mô hình 3D (hiện mới có bóng đèn).
+4. Test tự động với Home Assistant giả lập.

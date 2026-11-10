@@ -37,3 +37,12 @@ lovelace:
       show_in_sidebar: true
       require_admin: true
       filename: dashboards/demo_control.yaml
+
+# Căn hộ 3D (Digital Twin): web component trong www/digital-twin, dùng phiên đăng nhập
+# của Home Assistant nên không cần token. Đổi ?v= khi sửa file JS để trình duyệt tải lại.
+panel_custom:
+  - name: truongha-digital-twin
+    url_path: digital-twin
+    sidebar_title: Căn hộ 3D
+    sidebar_icon: mdi:cube-outline
+    module_url: /local/digital-twin/truongha-digital-twin.js?v=2
